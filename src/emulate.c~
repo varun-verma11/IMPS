@@ -40,14 +40,18 @@ int main(int argc, char **argv) {
     
   while (true) {
     uint8_t opcode = getOpcode(processor.memory[processor.pc]);
+    ++processor.pc;
     switch (opcode) {
       case HALT : return EXIT_SUCCESS;
-      case ADD  : 
-      case ADDI :
-      case SUB  :
-      case SUBI :
-      case MUL  :
-      case MULI :
+      case ADD  : processor.gpr[] = processor.gpr[] + processor.gpr[] ; break;
+      case ADDI : processor.gpr[] = processor.gpr[] + 
+                    getImmediateValue(processor.memory[processor.pc]) ; break;
+      case SUB  : processor.gpr[] = processor.gpr[] - processor.gpr[] ; break;
+      case SUBI : processor.gpr[] = processor.gpr[] - 
+                    getImmediateValue(processor.memory[processor.pc]) ; break;
+      case MUL  : processor.gpr[] = processor.gpr[] * processor.gpr[] ; break;
+      case MULI : processor.gpr[] = processor.gpr[] * 
+                    getImmediateValue(processor.memory[processor.pc]) ; break;
       case LW   :
       case SW   :
       case BEQ  :
@@ -61,8 +65,6 @@ int main(int argc, char **argv) {
       case JAL  :
       case OUT  :
     }
-    ++
-    ++i;
   }
   
   return EXIT_SUCCESS;
