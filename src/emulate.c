@@ -4,7 +4,7 @@
 #include <assert.h>
 #define MEMORY_SIZE 65536
 
-enum opCodes {HALT=0, ADD, ADDI, SUB,SUBI,MUL,MULI,LW,SW,BEQ, BNE, BLT, BGT, BLE, 
+enum opCodes {HALT, ADD, ADDI, SUB,SUBI,MUL,MULI,LW,SW,BEQ, BNE, BLT, BGT, BLE, 
                 BGE, JMP, JR, JAL, OUT};
 
 struct Processor {
