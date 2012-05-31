@@ -59,9 +59,8 @@ reads the binary instruction and sets the value of registers, addresses and/or
 Immediate values accordingly.
 
 -Ganesh
-*/
+
 char getOptype(uint32_t instruction) {
-  char opType;
   switch (getOpcode(instruction)) {
     case ADD  : return 'r';
     case ADDI : return 'i';
@@ -84,7 +83,7 @@ char getOptype(uint32_t instruction) {
     default   : return ' ';
   }
 }
-
+*/
 void parseInstruction(uint32_t instruction) {
   uint32_t mask1;
   uint32_t mask2;
@@ -93,6 +92,11 @@ void parseInstruction(uint32_t instruction) {
     mask1 = 0x03e00000;
     mask2 = 0x001f0000;
     mask3 = 0x0000ffff;
+    uint32_t reg1 = mask1 & instruction;
+    reg1 = reg1 >> 21;
+    uint32_t reg2 = mask2 & instruction;
+    reg2 = reg2 >> 16;
+    uint32_t immediateValue = mask3 & instruction;
   } else if(getOptype(instruction)=='r') {
     mask1 = 0x03e00000;
     mask2 = 0x001f0000;
@@ -121,9 +125,17 @@ uint32_t get_address_of_j_type(uint32_t instruction) {
                        10 of the given instruction
 */
 uint8_t getR1(uint32_t instruction) {
-
+  uint32_t mask = 0x03e00000;
+  uint32_t
 }
 
+uint8_t getR2(uint32_t instruction) {
+  uint32_t mask = 0x001f0000;
+}
+
+uint8_t getR3(uint32_t instruction) {
+  uint32_t mask = 0x000f8000;
+}
 /*
   This method 
   @param argv : this specifies the argueents which were given through the
