@@ -4,15 +4,32 @@
 #include <assert.h>
 #define MEMORY_SIZE 65536
 
+/*
+  The enumeration opCodes stores all the opcodes which a user can have in the 
+  file
+*/
 enum opCodes {HALT, ADD, ADDI, SUB,SUBI,MUL,MULI,LW,SW,BEQ, BNE, BLT, BGT, BLE, 
                 BGE, JMP, JR, JAL, OUT};
 
+/*
+  The structure processor stores the state of the processor. pc is used to store
+  the value of program counter; gpr are the 32-bit general purpose registers;
+  and the array memory represents the memory of the memory size specified.
+*/
 struct Processor {
   uint32_t pc;
   uint32_t gpr[32];
   uint32_t memory[MEMORY_SIZE]; 
 };
 
+/*
+  The method binaryFileLoader laods the binary file in the memory of the given
+  processor.
+  @param processor : this specifes the current processor with the memory to be
+                     initialised with the given instructions from given filepath
+  @param filepath  : this specifies the path of the file which contains the
+                     instructions to be loaded in the memory.
+*/
 void binaryFileLoader(char filepath[], struct Processor processor) {
   FILE *fp;
   if ((fp = fopen(filepath,"b")==NULL)) {
@@ -23,6 +40,11 @@ void binaryFileLoader(char filepath[], struct Processor processor) {
   fclose(fp);
 }
 
+/*
+  This method returns the opcode (bit 0 to 5) from the given 32 bit instruction
+  @param instruction : This specifies the 32 bit instruction
+  @return            : The method returns 8bit representation of the opcode
+*/
 uint8_t getOpcode(uint32_t instruction) {
   uint32_t mask = 0xfc000000;
   uint32_t opcd = mask & instruction;
@@ -41,27 +63,26 @@ Immediate values accordingly.
 char getOptype(uint32_t instruction) {
   char opType;
   switch (getOpcode(instruction)) {
-    case ADD  : opType = 'r'; break;
-    case ADDI : opType = 'i'; break;
-    case SUB  : opType = 'r'; break;
-    case SUBI : opType = 'i'; break;
-    case MUL  : opType = 'r'; break;
-    case MULI : opType = 'i'; break;
-    case LW   : opType = 'i'; break;
-    case SW   : opType = 'i'; break;
-    case BEQ  : opType = 'i'; break;
-    case BNE  : opType = 'i'; break;
-    case BLT  : opType = 'i'; break;
-    case BGT  : opType = 'i'; break;
-    case BLE  : opType = 'i'; break;
-    case BGE  : opType = 'i'; break;
-    case JMP  : opType = 'i'; break;
-    case JR   : opType = 'r'; break;
-    case JAL  : opType = 'j'; break;
-    case OUT  : opType = 'r'; break;
-    default   : opType = opType;
+    case ADD  : return 'r';
+    case ADDI : return 'i';
+    case SUB  : return 'r';
+    case SUBI : return 'i';
+    case MUL  : return 'r';
+    case MULI : return 'i';
+    case LW   : return 'i';
+    case SW   : return 'i';
+    case BEQ  : return 'i';
+    case BNE  : return 'i';
+    case BLT  : return 'i';
+    case BGT  : return 'i';
+    case BLE  : return 'i';
+    case BGE  : return 'i';
+    case JMP  : return 'i';
+    case JR   : return 'r';
+    case JAL  : return 'j';
+    case OUT  : return 'r';
+    default   : return ' ';
   }
-  return opType;
 }
 
 void parseInstruction(uint32_t instruction) {
@@ -72,17 +93,22 @@ void parseInstruction(uint32_t instruction) {
     mask1 = 0x03e00000;
     mask2 = 0x001f0000;
     mask3 = 0x0000ffff;
-  }
-  if(getOptype(instruction)=='r') {
+  } else if(getOptype(instruction)=='r') {
     mask1 = 0x03e00000;
     mask2 = 0x001f0000;
     mask3 = 0x000f8000;
-  }
-  if(getOptype(instruction)=='j') {
+  }else if(getOptype(instruction)=='j') {
     mask1 = 0x03ffffff;
   }
 }
 
+/*
+  This method 
+  @param argv : this specifies the argueents which were given through the
+                terminal when the program was run.
+  @param argc : this specifes the number of arguments provided
+  @return     : the method returns 0 when the method executes without any errors
+*/
 int main(int argc, char **argv) {
   assert("There are wrong number of arguents given" && argc==1);
   struct Processor processor;
