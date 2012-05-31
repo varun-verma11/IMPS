@@ -23,14 +23,14 @@ struct Processor {
 };
 
 /*
-  The method binaryFileLoader laods the binary file in the memory of the given
+  The method binaryFileLoader loads the binary file in the memory of the given
   processor.
   @param processor : this specifes the current processor with the memory to be
                      initialised with the given instructions from given filepath
   @param filepath  : this specifies the path of the file which contains the
                      instructions to be loaded in the memory.
 */
-void binaryFileLoader(char filepath[], struct Processor processor) {
+void binaryFileLoader(char filepath[], struct Processor *processor) {
   FILE *fp;
   if ((fp = fopen(filepath,"b")==NULL)) {
     perror("ERROR in opening file");
@@ -126,16 +126,39 @@ uint32_t get_address_of_j_type(uint32_t instruction) {
 */
 uint8_t getR1(uint32_t instruction) {
   uint32_t mask = 0x03e00000;
-  uint32_t
+  uint32_t reg = mask & instruction;
+  uint8_t r1 = reg >> 21;
+  return r1;
 }
 
 uint8_t getR2(uint32_t instruction) {
   uint32_t mask = 0x001f0000;
+  uint32_t reg = mask & instruction;
+  uint8_t r2 = reg >> 16;
+  return r2;
 }
 
 uint8_t getR3(uint32_t instruction) {
   uint32_t mask = 0x000f8000;
+  return ((mask & instruction) >> 15);
 }
+
+uint16_t getImmediateValue(uint32_t instruction) {
+  uint32_t mask = 0x0000ffff;
+  return (mask & instruction);
+}
+
+uint32_t setPC(uint32_t instruction,uint32_t pc) {
+  pc = pc + (getImmediateValue(instruction)*4);
+  return pc;
+}
+
+/*
+void setPC(struct Processor *processor) {
+  --(&(processor->pc));
+  (&(processor->pc)) = (&(processor->pc)) + (getImmediateValue(processor->memory[(&(processor->pc))])*4);
+}
+/*
 /*
   This method 
   @param argv : this specifies the argueents which were given through the
@@ -150,32 +173,33 @@ int main(int argc, char **argv) {
   char filepath[] = argv[0];
   binaryFileLoader(filepath, processor);
     
-  while (true) {
+  while (1) {
+    uint32_t instruction = processor.memory[(int) processor.pc];
     uint8_t opcode = getOpcode(processor.memory[processor.pc]);
     ++processor.pc;
     switch (opcode) {
       case HALT : return EXIT_SUCCESS;
-      case ADD  : processor.gpr[] = processor.gpr[] + processor.gpr[] ; break;
-      case ADDI : processor.gpr[] = processor.gpr[] + 
-                    getImmediateValue(processor.memory[processor.pc]) ; break;
-      case SUB  : processor.gpr[] = processor.gpr[] - processor.gpr[] ; break;
-      case SUBI : processor.gpr[] = processor.gpr[] - 
-                    getImmediateValue(processor.memory[processor.pc]) ; break;
-      case MUL  : processor.gpr[] = processor.gpr[] * processor.gpr[] ; break;
-      case MULI : processor.gpr[] = processor.gpr[] * 
-                    getImmediateValue(processor.memory[processor.pc]) ; break;
-      case LW   :
-      case SW   :
-      case BEQ  :
-      case BNE  :
-      case BLT  :
-      case BGT  :
-      case BLE  :
-      case BGE  :
-      case JMP  :
-      case JR   :
-      case JAL  :
-      case OUT  :
+      case ADD  : processor.gpr[getR1(instruction)] = processor.gpr[getR2(instruction)] + processor.gpr[getR3(instruction)] ; break;
+      case ADDI : processor.gpr[getR1(instruction)] = processor.gpr[getR2(instruction)] + 
+                    getImmediateValue(instruction) ; break;
+      case SUB  : processor.gpr[getR1(instruction)] = processor.gpr[getR2(instruction)] - processor.gpr[getR3(instruction)] ; break;
+      case SUBI : processor.gpr[getR1(instruction)] = processor.gpr[getR2(instruction)] - 
+                    getImmediateValue(instruction) ; break;
+      case MUL  : processor.gpr[getR1(instruction)] = processor.gpr[getR2(instruction)] * processor.gpr[getR3(instruction)] ; break;
+      case MULI : processor.gpr[getR1(instruction)] = processor.gpr[getR2(instruction)] * 
+                    getImmediateValue(instruction) ; break;
+      case LW   : processor.gpr[getR1(instruction)] = processor.memory[getR2(instruction) + getImmediateValue(instruction)];
+      case SW   : processor.memory[getR2(instruction) + getImmediateValue(instruction)] = processor.gpr[getR1(instruction)];
+      case BEQ  : if (&(processor.gpr[getR1(instruction)])==&(processor.gpr[getR1(instruction)])) { setPC(instruction, processor.pc);};
+      case BNE  : if (&(processor.gpr[getR1(instruction)])!=&(processor.gpr[getR1(instruction)])) { setPC(instruction,processor.pc);};
+      case BLT  : if (&(processor.gpr[getR1(instruction)])<&(processor.gpr[getR1(instruction)]))  { setPC(instruction,processor.pc);};
+      case BGT  : if (&(processor.gpr[getR1(instruction)])>&(processor.gpr[getR1(instruction)]))  { setPC(instruction,processor.pc);};
+      case BLE  : if (&(processor.gpr[getR1(instruction)])<=&(processor.gpr[getR1(instruction)])) { setPC(instruction,processor.pc);};
+      case BGE  : if (&(processor.gpr[getR1(instruction)])>=&(processor.gpr[getR1(instruction)])) { setPC(instruction,processor.pc);};
+      case JMP  : processor.pc = getAddress(instruction);
+      case JR   : processor.pc = &(getR1(instruction));
+      case JAL  : processor.gpr[31] = processor.pc + 4; processor.pc = getAddress(instruction);
+      case OUT  : printf("%c\n",processor.gpr[getR1(instruction)]);
     }
   }
   
