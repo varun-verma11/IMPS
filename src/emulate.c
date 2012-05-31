@@ -103,6 +103,28 @@ void parseInstruction(uint32_t instruction) {
 }
 
 /*
+  This method returns the bit 6 to 31 of the given instruction, i.e. the address
+  for j-type instructions
+  @param instruction : this specifies the instruction
+  @return            : the method returns 32 bit representation of the bit 6 to 
+                       31 of the given instruction
+*/
+uint32_t get_address_of_j_type(uint32_t instruction) {
+  uint32_t mask = 0x03ffffff;
+  return mask & instruction;
+}
+
+/*
+  This method returns the bit 6 to 10 of the given instruction
+  @param instruction : this specifies the instruction
+  @return            : the method returns 8 bit representation of the bit 6 to 
+                       10 of the given instruction
+*/
+uint8_t getR1(uint32_t instruction) {
+
+}
+
+/*
   This method 
   @param argv : this specifies the argueents which were given through the
                 terminal when the program was run.
