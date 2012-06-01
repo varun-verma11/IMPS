@@ -30,9 +30,10 @@ struct Processor {
   @param filepath  : this specifies the path of the file which contains the
                      instructions to be loaded in the memory.
 */
-void binaryFileLoader(char filepath[], struct Processor *processor) {
+void binaryFileLoader(char *filepath, struct Processor *processor) {
   FILE *fp;
-  if ((fp = fopen(filepath,"b")==NULL)) {
+  (fp = fopen(filepath,"rb"));
+  if (fp==NULL) {
     perror("ERROR in opening file");
     exit(EXIT_FAILURE);
   }
@@ -49,62 +50,10 @@ uint8_t getOpcode(uint32_t instruction) {
   uint32_t mask = 0xfc000000;
   uint32_t opcd = mask & instruction;
   opcd = opcd >> 26;
-  uint8_t opCode = opcd;
+  uint8_t opCode = (int) opcd;
   return opCode;
 }
-/*
-The method below will get the opType from a given instruction as a char
-of the corresponding type. This is used by the method parseInstruction which
-reads the binary instruction and sets the value of registers, addresses and/or
-Immediate values accordingly.
 
--Ganesh
-
-char getOptype(uint32_t instruction) {
-  switch (getOpcode(instruction)) {
-    case ADD  : return 'r';
-    case ADDI : return 'i';
-    case SUB  : return 'r';
-    case SUBI : return 'i';
-    case MUL  : return 'r';
-    case MULI : return 'i';
-    case LW   : return 'i';
-    case SW   : return 'i';
-    case BEQ  : return 'i';
-    case BNE  : return 'i';
-    case BLT  : return 'i';
-    case BGT  : return 'i';
-    case BLE  : return 'i';
-    case BGE  : return 'i';
-    case JMP  : return 'i';
-    case JR   : return 'r';
-    case JAL  : return 'j';
-    case OUT  : return 'r';
-    default   : return ' ';
-  }
-}
-*/
-void parseInstruction(uint32_t instruction) {
-  uint32_t mask1;
-  uint32_t mask2;
-  uint32_t mask3;
-  if(getOptype(instruction)=='i') {
-    mask1 = 0x03e00000;
-    mask2 = 0x001f0000;
-    mask3 = 0x0000ffff;
-    uint32_t reg1 = mask1 & instruction;
-    reg1 = reg1 >> 21;
-    uint32_t reg2 = mask2 & instruction;
-    reg2 = reg2 >> 16;
-    uint32_t immediateValue = mask3 & instruction;
-  } else if(getOptype(instruction)=='r') {
-    mask1 = 0x03e00000;
-    mask2 = 0x001f0000;
-    mask3 = 0x000f8000;
-  }else if(getOptype(instruction)=='j') {
-    mask1 = 0x03ffffff;
-  }
-}
 
 /*
   This method returns the bit 6 to 31 of the given instruction, i.e. the address
@@ -113,7 +62,7 @@ void parseInstruction(uint32_t instruction) {
   @return            : the method returns 32 bit representation of the bit 6 to 
                        31 of the given instruction
 */
-uint32_t get_address_of_j_type(uint32_t instruction) {
+uint32_t getAddress(uint32_t instruction) {
   uint32_t mask = 0x03ffffff;
   return mask & instruction;
 }
@@ -131,6 +80,12 @@ uint8_t getR1(uint32_t instruction) {
   return r1;
 }
 
+/*
+  This method returns the bit 11 to 15 of the given instruction
+  @param instruction : this specifies the instruction
+  @return            : the method returns 8 bit representation of the bit 11 to 
+                       15 of the given instruction
+*/
 uint8_t getR2(uint32_t instruction) {
   uint32_t mask = 0x001f0000;
   uint32_t reg = mask & instruction;
@@ -138,19 +93,37 @@ uint8_t getR2(uint32_t instruction) {
   return r2;
 }
 
+/*
+  This method returns the bit 16 to 21 of the given instruction
+  @param instruction : this specifies the instruction
+  @return            : the method returns 8 bit representation of the bit 16 to 
+                       21 of the given instruction
+*/
 uint8_t getR3(uint32_t instruction) {
   uint32_t mask = 0x000f8000;
   return ((mask & instruction) >> 15);
 }
 
+/*
+  This method returns the bit 16 to 31 of the given instruction
+  @param instruction : this specifies the instruction
+  @return            : the method returns 8 bit representation of the bit 16 to 
+                       31 of the given instruction
+*/
 uint16_t getImmediateValue(uint32_t instruction) {
   uint32_t mask = 0x0000ffff;
   return (mask & instruction);
 }
 
+/*
+  This method returns a new value for the pc to pc
+  @param instruction : this specifies the instruction
+  @return            : the method returns 8 bit representation of the bit 6 to 
+                       10 of the given instruction
+*/
 uint32_t setPC(uint32_t instruction,uint32_t pc) {
-  pc = pc + (getImmediateValue(instruction)*4);
-  return pc;
+  pc--;
+  return pc+(getImmediateValue(instruction)*4);
 }
 
 /*
@@ -158,7 +131,8 @@ void setPC(struct Processor *processor) {
   --(&(processor->pc));
   (&(processor->pc)) = (&(processor->pc)) + (getImmediateValue(processor->memory[(&(processor->pc))])*4);
 }
-/*
+*/
+
 /*
   This method 
   @param argv : this specifies the argueents which were given through the
@@ -167,11 +141,12 @@ void setPC(struct Processor *processor) {
   @return     : the method returns 0 when the method executes without any errors
 */
 int main(int argc, char **argv) {
-  assert("There are wrong number of arguents given" && argc==1);
+  assert("There are wrong number of arguents given" && argc==2);
   struct Processor processor;
   processor.pc = 0;
-  char filepath[] = argv[0];
-  binaryFileLoader(filepath, processor);
+  char *filepath = argv[1];
+  printf("%s\n",filepath);
+  binaryFileLoader(filepath, &processor);
     
   while (1) {
     uint32_t instruction = processor.memory[(int) processor.pc];
@@ -197,11 +172,11 @@ int main(int argc, char **argv) {
       case BLE  : if (&(processor.gpr[getR1(instruction)])<=&(processor.gpr[getR1(instruction)])) { setPC(instruction,processor.pc);};
       case BGE  : if (&(processor.gpr[getR1(instruction)])>=&(processor.gpr[getR1(instruction)])) { setPC(instruction,processor.pc);};
       case JMP  : processor.pc = getAddress(instruction);
-      case JR   : processor.pc = &(getR1(instruction));
+      case JR   : processor.pc = (getR1(instruction));
       case JAL  : processor.gpr[31] = processor.pc + 4; processor.pc = getAddress(instruction);
       case OUT  : printf("%c\n",processor.gpr[getR1(instruction)]);
     }
   }
-  
+
   return EXIT_SUCCESS;
 }
