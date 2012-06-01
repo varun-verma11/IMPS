@@ -151,6 +151,11 @@ void setMemory(struct Processor *proc, uint32_t address, int32_t value)
   *(uint32_t *)(proc->memory + address) = value;
 }
 
+uint32_t getMemory(struct Processor *proc, uint32_t address)
+{
+  return *(uint32_t *)(proc->memory + address);
+}
+
 uint32_t getInstructionAtPC(struct Processor *proc)
 {
   return *(uint32_t *)(proc->memory + proc->pc);
@@ -167,6 +172,15 @@ void setPC(struct Processor *processor) {
   (&(processor->pc)) = (&(processor->pc)) + (getImmediateValue(processor->memory[(&(processor->pc))])*4);
 }
 */
+
+/**
+
+      case LW   : processor.gpr[getR1(instruction)] = processor.memory[getRegisterValue(&processor, getR2(instruction)) + getRegisterValue(&processor, getImmediateValue(instruction))];
+        break;
+      case SW   : processor.memory[getRegisterValue(&processor, getR2(instruction)) + getRegisterValue(&processor, getImmediateValue(instruction))] = getRegisterValue(&processor, getR1(instruction));
+        break;
+        
+**/
 
 /*
   This method 
@@ -188,29 +202,53 @@ int main(int argc, char **argv) {
     uint32_t instruction = getInstructionAtPC(&processor);
     uint8_t opcode = getOpcode(instruction);
     processor.pc += sizeof(uint32_t);
-printf("0x%08X -> %d\n", instruction, (int)opcode);
     switch (opcode) {
       case HALT : return EXIT_SUCCESS;
-      case ADD  : processor.gpr[getRegisterValue(&processor, getR1(instruction))] = processor.gpr[getRegisterValue(&processor, getR2(instruction))] + processor.gpr[getRegisterValue(&processor, getR3(instruction))] ; break;
-      case ADDI : processor.gpr[getRegisterValue(&processor, getR1(instruction))] = processor.gpr[getRegisterValue(&processor, getR2(instruction))] + getImmediateValue(instruction) ; break;
-      case SUB  : processor.gpr[getRegisterValue(&processor, getR1(instruction))] = processor.gpr[getRegisterValue(&processor, getR2(instruction))] - processor.gpr[getRegisterValue(&processor, getR3(instruction))] ; break;
-      case SUBI : processor.gpr[getRegisterValue(&processor, getR1(instruction))] = processor.gpr[getRegisterValue(&processor, getR2(instruction))] - getImmediateValue(instruction) ; break;
-      case MUL  : processor.gpr[getRegisterValue(&processor, getR1(instruction))] = processor.gpr[getRegisterValue(&processor, getR2(instruction))] * processor.gpr[getRegisterValue(&processor, getR3(instruction))] ; break;
-      case MULI : processor.gpr[getRegisterValue(&processor, getR1(instruction))] = processor.gpr[getRegisterValue(&processor, getR2(instruction))] * getImmediateValue(instruction) ; break;
-      case LW   : processor.gpr[getRegisterValue(&processor, getR1(instruction))] = processor.memory[getRegisterValue(&processor, getR2(instruction)) + getImmediateValue(instruction)];
-      case SW   : setMemory(&processor, getR2(instruction) + getImmediateValue(instruction), 
-      processor.gpr[getRegisterValue(&processor, getR1(instruction))]);
-      case BEQ  : if (&(processor.gpr[getRegisterValue(&processor, getR1(instruction))])==&(processor.gpr[getRegisterValue(&processor, getR2(instruction))])) { setPC(instruction, processor.pc);};
-      case BNE  : if (&(processor.gpr[getRegisterValue(&processor, getR1(instruction))])!=&(processor.gpr[getRegisterValue(&processor, getR2(instruction))])) { setPC(instruction,processor.pc);};
-      case BLT  : if (&(processor.gpr[getRegisterValue(&processor, getR1(instruction))])<&(processor.gpr[getRegisterValue(&processor, getR2(instruction))]))  { setPC(instruction,processor.pc);};
-      case BGT  : if (&(processor.gpr[getRegisterValue(&processor, getR1(instruction))])>&(processor.gpr[getRegisterValue(&processor, getR2(instruction))]))  { setPC(instruction,processor.pc);};
-      case BLE  : if (&(processor.gpr[getRegisterValue(&processor, getR1(instruction))])<=&(processor.gpr[getRegisterValue(&processor, getR2(instruction))])) { setPC(instruction,processor.pc);};
-      case BGE  : if (&(processor.gpr[getRegisterValue(&processor, getR1(instruction))])>=&(processor.gpr[getRegisterValue(&processor, getR2(instruction))])) { setPC(instruction,processor.pc);};
+      case ADD  : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) + getRegisterValue(&processor, getR3(instruction));
+        break;
+      case ADDI : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) + getImmediateValue(instruction);
+        break;
+      case SUB  : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) - getRegisterValue(&processor, getR3(instruction));
+        break;
+      case SUBI : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) - getImmediateValue(instruction);
+        break;
+      case MUL  : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) * getRegisterValue(&processor, getR3(instruction));
+        break;
+      case MULI : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) * getImmediateValue(instruction);
+        break;
+      case LW   : processor.gpr[getR1(instruction)] = getMemory(&processor, getR2(instruction) + getImmediateValue(instruction));
+        break;
+      case SW   : setMemory(&processor, getRegisterValue(&processor, getR2(instruction)) + getImmediateValue(instruction), getRegisterValue(&processor, getR1(instruction)));
+        break;
+      case BEQ  : if (processor.gpr[getR1(instruction)] == processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
+        break;
+      case BNE  : if (processor.gpr[getR1(instruction)] != processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
+        break;
+      case BLT  : if (processor.gpr[getR1(instruction)] < processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
+        break;
+      case BGT  : if (processor.gpr[getR1(instruction)] > processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
+        break;
+      case BLE  : if (processor.gpr[getR1(instruction)] <= processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
+        break;
+      case BGE  : if (processor.gpr[getR1(instruction)] >= processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
+        break;
       case JMP  : processor.pc = getAddress(instruction);
-      case JR   : processor.pc = (getRegisterValue(&processor, getR1(instruction)));
+        break;
+      case JR   : processor.pc = getRegisterValue(&processor, getR1(instruction));
+        break;
       case JAL  : processor.gpr[31] = processor.pc + 4; processor.pc = getAddress(instruction);
-      case OUT  : printf("%c\n",processor.gpr[getRegisterValue(&processor, getR1(instruction))]);
+        break;
+      case OUT  : printf("%c\n", (char)getRegisterValue(&processor, getR1(instruction)));
+      /*
+        {
+          uint32_t reg = getR1(instruction);
+          printf("out instruction: %d -> 0x%08X\n", reg, processor.gpr[reg]);
+          // printf("%c", (char)getRegisterValue(&processor, getR1(instruction)));
+        }
+        */
+        break;
       default : printf("invalid opcode\n");
+        break;
     }
   }
 
