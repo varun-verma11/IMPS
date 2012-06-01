@@ -1,7 +1,6 @@
 start:      jal mult              - Jump to multiplication routine
             jal print_c           - Jump to print routine
             halt                  - Halt when we're done
-
 mult:       lw $1 $0 a            - $1 = a.rows
             addi $2 $0 4          - $2 = 4 (Offset to a.cols and b.cols)
             lw $3 $2 a            - $3 = a.cols
