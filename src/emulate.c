@@ -47,17 +47,8 @@ void binaryFileLoader(char *filepath, struct Processor *processor) {
   fileSize = ftell (fp);
   rewind (fp);
 
-  // fileSize = MIN(65536, fileSize);
-
+  fileSize = MIN(65536, fileSize);
   fread(processor->memory, sizeof(uint32_t), fileSize, fp);
-  /*
-  int i = sizeof(fp);
-  while ( i!=0) {
-    printf("%d\t",i);
-    printf("%x\n",(processor->memory[i]));
-    i--;
-  }
-  */
   fclose(fp);
 }
 
@@ -146,45 +137,58 @@ uint32_t setPC(uint32_t instruction,uint32_t pc) {
   return pc+(getImmediateValue(instruction)*4);
 }
 
-void setMemory(struct Processor *proc, uint32_t address, int32_t value)
-{
+/*
+  This method sets the value of the memory at the specified addredd to the value
+  given.
+  @param proc    : specifies the processor
+  @param address : specifies the address of memory which needs the value to be
+                   set to the given value
+  @param value   : specifies the new value for the memory to be set
+*/
+void setMemory(struct Processor *proc, uint32_t address, int32_t value) {
   *(uint32_t *)(proc->memory + address) = value;
 }
 
+/*
+  This method returns the data stored at in the memory of the specifed processor
+  at the specified address.
+  @param proc    : specifies the processor 
+  @param address : specifies the address of the memory which data has to be
+                   fetched
+  @return        : returns the value stored in the memory at the specified
+                   address
+*/
 uint32_t getMemory(struct Processor *proc, uint32_t address)
-{
   return *(uint32_t *)(proc->memory + address);
 }
 
-uint32_t getInstructionAtPC(struct Processor *proc)
-{
+/*
+  This method returns the instruction stored in the memory at address specified
+  by the program counter of the processor.
+  @param proc : specifies the processor which contains the program counter,
+                memory, and registers
+*/
+uint32_t getInstructionAtPC(struct Processor *proc){
   return *(uint32_t *)(proc->memory + proc->pc);
 }
 
-int32_t getRegisterValue(struct Processor *proc, int8_t reg)
-{
+/*
+  This method returns the value stored in the specified register
+  @param reg  : specifies the register index whose value has to be returned
+  @param proc : specifies the processor from which the value of register has to
+                be returned
+  @return     : returns the value of the register specifed by the index given
+*/
+int32_t getRegisterValue(struct Processor *proc, int8_t reg){
   return proc->gpr[reg];
 }
 
 /*
-void setPC(struct Processor *processor) {
-  --(&(processor->pc));
-  (&(processor->pc)) = (&(processor->pc)) + (getImmediateValue(processor->memory[(&(processor->pc))])*4);
-}
-*/
-
-/**
-
-      case LW   : processor.gpr[getR1(instruction)] = processor.memory[getRegisterValue(&processor, getR2(instruction)) + getRegisterValue(&processor, getImmediateValue(instruction))];
-        break;
-      case SW   : processor.memory[getRegisterValue(&processor, getR2(instruction)) + getRegisterValue(&processor, getImmediateValue(instruction))] = getRegisterValue(&processor, getR1(instruction));
-        break;
-        
-**/
-
-/*
-  This method 
-  @param argv : this specifies the argueents which were given through the
+  This method carries out the execution of the binary code in the file specified
+  by the arguments at run time. The file is loaded into the memory of the
+  structure processor and then the execution is carried out in the while loop.
+  The execution of terminates when an instruction with opcode HALT is reached.
+  @param argv : this specifies the arguements which were given through the
                 terminal when the program was run.
   @param argc : this specifes the number of arguments provided
   @return     : the method returns 0 when the method executes without any errors
@@ -204,51 +208,89 @@ int main(int argc, char **argv) {
     processor.pc += sizeof(uint32_t);
     switch (opcode) {
       case HALT : return EXIT_SUCCESS;
-      case ADD  : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) + getRegisterValue(&processor, getR3(instruction));
-        break;
-      case ADDI : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) + getImmediateValue(instruction);
-        break;
-      case SUB  : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) - getRegisterValue(&processor, getR3(instruction));
-        break;
-      case SUBI : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) - getImmediateValue(instruction);
-        break;
-      case MUL  : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) * getRegisterValue(&processor, getR3(instruction));
-        break;
-      case MULI : processor.gpr[getR1(instruction)] = getRegisterValue(&processor, getR2(instruction)) * getImmediateValue(instruction);
-        break;
-      case LW   : processor.gpr[getR1(instruction)] = getMemory(&processor, getR2(instruction) + getImmediateValue(instruction));
-        break;
-      case SW   : setMemory(&processor, getRegisterValue(&processor, getR2(instruction)) + getImmediateValue(instruction), getRegisterValue(&processor, getR1(instruction)));
-        break;
-      case BEQ  : if (processor.gpr[getR1(instruction)] == processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
-        break;
-      case BNE  : if (processor.gpr[getR1(instruction)] != processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
-        break;
-      case BLT  : if (processor.gpr[getR1(instruction)] < processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
-        break;
-      case BGT  : if (processor.gpr[getR1(instruction)] > processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
-        break;
-      case BLE  : if (processor.gpr[getR1(instruction)] <= processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
-        break;
-      case BGE  : if (processor.gpr[getR1(instruction)] >= processor.gpr[getR2(instruction)]) { processor.pc += getImmediateValue(instruction) * 4;};
-        break;
+      case ADD  : processor.gpr[getR1(instruction)] = 
+                    getRegisterValue(&processor, getR2(instruction)) + 
+                    getRegisterValue(&processor, getR3(instruction));
+                  break;
+                  
+      case ADDI : processor.gpr[getR1(instruction)] = 
+                    getRegisterValue(&processor, getR2(instruction)) + 
+                    getImmediateValue(instruction);
+                 break;
+                 
+      case SUB  : processor.gpr[getR1(instruction)] = 
+                    getRegisterValue(&processor, getR2(instruction)) - 
+                    getRegisterValue(&processor, getR3(instruction));
+                  break;
+                  
+      case SUBI : processor.gpr[getR1(instruction)] = 
+                    getRegisterValue(&processor, getR2(instruction)) - 
+                    getImmediateValue(instruction);
+                  break;
+                  
+      case MUL  : processor.gpr[getR1(instruction)] = 
+                    getRegisterValue(&processor, getR2(instruction)) * 
+                    getRegisterValue(&processor, getR3(instruction));
+                  break;
+                  
+      case MULI : processor.gpr[getR1(instruction)] = 
+                    getRegisterValue(&processor, getR2(instruction)) * 
+                    getImmediateValue(instruction);
+                  break;
+                  
+      case LW   : processor.gpr[getR1(instruction)] = 
+                    getMemory(&processor, getR2(instruction) + 
+                      getImmediateValue(instruction));
+                  break;
+      case SW   : setMemory(&processor, getRegisterValue
+                    (&processor, getR2(instruction)) + 
+                    getImmediateValue(instruction), 
+                    getRegisterValue(&processor, getR1(instruction)));
+                  break;
+                  
+      case BEQ  : if (processor.gpr[getR1(instruction)] == 
+                      processor.gpr[getR2(instruction)]) 
+                    { processor.pc += getImmediateValue(instruction) * 4;};
+                  break;
+                  
+      case BNE  : if (processor.gpr[getR1(instruction)] != 
+                      processor.gpr[getR2(instruction)]) 
+                    { processor.pc += getImmediateValue(instruction) * 4;};
+                  break;
+                  
+      case BLT  : if (processor.gpr[getR1(instruction)] <
+                      processor.gpr[getR2(instruction)])
+                    { processor.pc += getImmediateValue(instruction) * 4;};
+                  break;
+                  
+      case BGT  : if (processor.gpr[getR1(instruction)] >
+                     processor.gpr[getR2(instruction)]) 
+                   { processor.pc += getImmediateValue(instruction) * 4;};
+                  break;
+                  
+      case BLE  : if (processor.gpr[getR1(instruction)] <= 
+                      processor.gpr[getR2(instruction)]) 
+                  { processor.pc += getImmediateValue(instruction) * 4;};
+                  break;
+                  
+      case BGE  : if (processor.gpr[getR1(instruction)] >= 
+                      processor.gpr[getR2(instruction)]) 
+                    { processor.pc += getImmediateValue(instruction) * 4;};
+                  break;
       case JMP  : processor.pc = getAddress(instruction);
-        break;
-      case JR   : processor.pc = getRegisterValue(&processor, getR1(instruction));
-        break;
-      case JAL  : processor.gpr[31] = processor.pc + 4; processor.pc = getAddress(instruction);
-        break;
-      case OUT  : printf("%c\n", (char)getRegisterValue(&processor, getR1(instruction)));
-      /*
-        {
-          uint32_t reg = getR1(instruction);
-          printf("out instruction: %d -> 0x%08X\n", reg, processor.gpr[reg]);
-          // printf("%c", (char)getRegisterValue(&processor, getR1(instruction)));
-        }
-        */
-        break;
-      default : printf("invalid opcode\n");
-        break;
+                  break;
+      case JR   : processor.pc = getRegisterValue
+                    (&processor, getR1(instruction));
+                  break;
+      case JAL  : processor.gpr[31] = processor.pc + 4; 
+                  processor.pc = getAddress(instruction);
+                  break;
+      case OUT  : printf("%c\n", (char)getRegisterValue
+                    (&processor, getR1(instruction)));
+                  break;
+                  
+      default   : printf("invalid opcode\n");
+                  break;
     }
   }
 
