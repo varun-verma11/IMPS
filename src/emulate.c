@@ -129,7 +129,6 @@ int16_t getImmediateValue(uint32_t instruction) {
   return (int16_t)(mask & instruction);
 }
 
-
 /*
   This method sets the value of the memory at the specified addredd to the value
   given.
@@ -176,8 +175,13 @@ int32_t getRegisterValue(struct Processor *proc, int8_t reg){
   return proc->gpr[reg];
 }
 
-void dumpProcessor(struct Processor *proc)
-{
+/*
+  This method prints the state of the processor at the end of execution of the
+  program; i.e. the data stored in all the registers and the value of program
+  counter at the end of the program
+  @param proc : this specifies the processor whose state has to be printed
+*/
+void dumpProcessor(struct Processor *proc) {
   fprintf(stderr, "\n\n-----\n\nPC=%d\n", proc->pc);
   for(int i = 0; i < 4; i++) {
     for(int j = 0; j < 8; j++) {
@@ -187,6 +191,7 @@ void dumpProcessor(struct Processor *proc)
       fprintf(stderr, "\n");
    }
 }
+
 /*
   This method carries out the execution of the binary code in the file specified
   by the arguments at run time. The file is loaded into the memory of the
@@ -211,16 +216,13 @@ int main(int argc, char **argv) {
     uint8_t opcode = getOpcode(instruction);
     uint32_t backupPC = processor.pc;
 
-    switch (opcode)
-    {
-      case ADD  : 
-                  processor.gpr[getR1(instruction)] = 
+    switch (opcode)  {
+      case ADD  : processor.gpr[getR1(instruction)] = 
                     getRegisterValue(&processor, getR2(instruction)) + 
                     getRegisterValue(&processor, getR3(instruction));
                   break;
                   
-      case ADDI :
-                  processor.gpr[getR1(instruction)] = 
+      case ADDI : processor.gpr[getR1(instruction)] = 
                     getRegisterValue(&processor, getR2(instruction)) + 
                     getImmediateValue(instruction);
                   break;
@@ -250,6 +252,7 @@ int main(int argc, char **argv) {
                             getRegisterValue(&processor, getR2(instruction)) + 
                                               getImmediateValue(instruction));
                   break;
+                  
       case SW   : setMemory(&processor, getRegisterValue
                     (&processor, getR2(instruction)) + 
                     getImmediateValue(instruction), 
@@ -286,14 +289,18 @@ int main(int argc, char **argv) {
                       processor.gpr[getR2(instruction)]) 
                     { processor.pc += (getImmediateValue(instruction) * 4);};
                   break;
+                  
       case JMP  : processor.pc = getAddress(instruction);
                   break;
+                  
       case JR   : processor.pc = getRegisterValue
                     (&processor, getR1(instruction));
                   break;
+                  
       case JAL  : processor.gpr[31] = processor.pc + sizeof(uint32_t); 
                   processor.pc = getAddress(instruction);
                   break;
+                  
       case OUT  : printf("%c", (char)getRegisterValue
                     (&processor, getR1(instruction)));
                   break;
@@ -301,6 +308,7 @@ int main(int argc, char **argv) {
       default   : printf("invalid opcode\n");
                   break;
     }
+    
     if(processor.pc == backupPC)
       processor.pc += sizeof(uint32_t);
   }
