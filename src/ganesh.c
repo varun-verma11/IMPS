@@ -22,7 +22,7 @@
   char labelTokenDelim[] = ": ";
   char opTokenDelim[] = " ";
   
-  
+  printf("hello world");
   for (i = 0, str1 = instruction; ;i++, str1 = NULL) {
     token = strtok_r(str1, labelTokenDelim, &saveptr1);
     if (token == NULL) break;
@@ -40,7 +40,10 @@
 }
 
 int main(void) {
+  printf("hello world\n");
+  
   char ins[] = "Label: addi $31 $32 32";
+  printf("%s",ins);
   char instructionPtr = *ins;
   char **tokens = tokeniser(&instructionPtr);
   int i;
