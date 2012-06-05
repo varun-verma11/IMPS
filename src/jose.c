@@ -22,36 +22,39 @@ int convertOpcode(char *tokens){
 */
 uint32_t parser_r(char **tokens){
  //2 registers saved into a given register
- int reg1 = (int) getRegisteNumber(tokens[1]);
- int reg2 = (int) getRegisteNumber(tokens[2]);
- int reg3 = (int) getRegisteNumber(tokens[3]);
+ int reg1 = (int) getRegisterNumber(tokens[1]);
+ int reg2 = (int) getRegisterNumber(tokens[2]);
+ int reg3 = (int) getRegisterNumber(tokens[3]);
  uint32_t reg1Opcode = reg1<<21;
  uint32_t reg2Opcode = reg2<<16;
  uint32_t reg3Opcode = reg3<<11;
+ return (reg1Opcode + reg2Opcode + reg3Opcode); 
 }
 
 uint32_t parser_j(char **tokens){
- int reg1 = (int) getRegisteNumber(tokens[1]);
- int reg2 = (int) getRegisteNumber(tokens[2]);
+ int reg1 = (int) getRegisterNumber(tokens[1]);
+ int reg2 = (int) getRegisterNumber(tokens[2]);
  uint32_t reg1Opcode = reg1<<21;
  uint32_t reg2Opcode = reg2<<16;
  if(checkhex(tokens[3])){
   uint32_t immediateValue = (uint32_t) tokens[3];
  } else if(checkLabel(tokens[3])){
-  uint32_t label = (int) getValue(tokens[3]);
+  uint32_t immediateValue = (int) getValue(tokens[3]);
  }else{
-  uint32_t decimal = (int) tokens[3];
+  uint32_t immediateValue = (int) tokens[3];
  }
+ return (reg1Opcode + reg2Opcode + immediateValue);
 
 }
 
 uint32_t parser_i(char **tokens){
  if(checkLabel(tokens[1])){
- uint32_t label = (int) getValue(tokens[1]);
+ uint32_t address = (int) getValue(tokens[1]);
  }
  else{
  uint32_t address = (uint32_t) tokens[1]
  }
+ return address;
 
 }
 
