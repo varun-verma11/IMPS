@@ -100,7 +100,6 @@ char getOptype(char *opcode) {
   
 }
 
-
 int main(int argc, char **argv) {
   struct Data data;
   return EXIT_SUCCESS;
