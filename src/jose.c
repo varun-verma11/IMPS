@@ -7,20 +7,24 @@ struct Data{
 
 
 uint32_t convertedOpcode=0;
+char *regNumber[];
+
+void getValue(char *tokens){
+}
 
 char *getRegisterNumber(char *reg){
- char *regNumber[strlen(reg) -2];
+// char *regNumber[strlen(reg) -2];
  if(strcmp("$", reg)==0){
    for(int i = 0; i<strlen(reg)-1; i++){
-     &regNumber[i] = &reg[i+1];
+     *regNumber[i] = &reg[i+1];
    }
-  return regNumber;
+  return &regNumber;
  }
 }
 
 
 int checkHex(char *reg){
- if(&reg[0]==0 && &reg[1] == 'x'){
+ if(reg[0]==0 && reg[1] == 'x'){
   return 1;
  }
  else{
@@ -28,11 +32,13 @@ int checkHex(char *reg){
  }
 
 }
+
 int checkLabel(char *reg){
- if(strlen(&reg)
+ if(strlen(reg)){
  return 0;
+ }
 }
- s
+
 
 uint32_t make_it(char **tokens, struct Data *data){
 uint32_t opcode = (int) getValue(&tokens[0]);
@@ -91,10 +97,9 @@ uint32_t parser_i(char **tokens){
 int main(){
 return 0;
 }
-void getValue(char *tokens){
-}
+
  
-}
+
 
 
 
