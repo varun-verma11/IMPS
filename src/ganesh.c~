@@ -24,7 +24,7 @@ char **tokeniser(char *instruction) {
     count++;
     /* Get the next token until end of string */
     token[count] = strtok_r(NULL, " ", &buf_pp);
-  } while (token[count1-1]!=NULL);
+  } while (token[count]!=NULL);
   /* Done */
   printf ("Done.\n");
   return token;
