@@ -22,7 +22,8 @@ void add_to_table(char key[], void* value, struct Table *table) {
   struct Table_elem new_elem /*= malloc(sizeof(struct Table_elem))*/;
   new_elem.value = value;
   //new_elem.next = (*(table->head)->next);
-  new_elem.key = &key;
+  new_elem.key = key;
+  new_elem.next = table->head->next;
   table->head->next = &new_elem;
   table->number_of_elems += 1;
 }
@@ -54,7 +55,7 @@ struct Table *initialise_table(void) {
   elem.value = 0;
   struct Table table;
   table.head = elem;
-  table->number_of_elems += 1;
+  table->number_of_elems = 1;
   add_to_table("halt",0,&table);
   add_to_table("add",1,&table);
   add_to_table("addi",2,&table);
@@ -77,7 +78,6 @@ struct Table *initialise_table(void) {
   add_to_table("f_for_r_type", &parser_r, &table);
   add_to_table("f_for_j_type", &parser_j, &table);
   add_to_table("f_for_i_type", &parser_i, &table);  
-  table->number_of_elems += 22;
   return &table;
 }
 
