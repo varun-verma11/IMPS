@@ -3,35 +3,42 @@
 #include <stdio.h>
 
 
-char **tokeniser(char *instruction) {
-
-  printf("%s \n",instruction);
-  
+void tokeniser(char *instruction) {
   char *buf_pp = NULL;
-  char *s;
   int count =0;
-  char **token = malloc(sizeof(char*)*3);
-  //printf("size of tokens  ->  %d \n",(sizeof(token)));
-  printf("check 2\n");
-    
-  /* Parse the first argument */
-  token[count] = strtok_r(&instruction, ":", &buf_pp);
+  char *s;
+  s = strtok_r(instruction, ":", &buf_pp);
   do {
-    /* Print the current token */
-    printf ("token  -> %s \n", token[count]);
-    /* Increment count */
+    printf("token --> %s \n",s);
     count++;
-    /* Get the next token until end of string */
-    token[count] = strtok_r(NULL, " ", &buf_pp);
-  } while (token[count-1]!=NULL);
-  /* Done */
-  printf ("Done.\n");
-  return token;
+    s = strtok_r(NULL, " ", &buf_pp);
+  } while (s!=NULL);
+  printf("token --> %s \n",s);
 }
 
 int main(void) {
-
-  char **tokens = tokeniser("label: addi $1 $23 32");  
+  //char **token = (char **) malloc(sizeof(char *) *5);
   
-  return 0;
+  static char ip_addr[] = "label: add $1 $2 $3";
+  char *buf_pp = NULL;
+  char *s = NULL;
+  int count = 0;
+
+  s = strtok_r (ip_addr, ":", &buf_pp);
+
+  while (s) {
+    /* Increment count */
+    count++;
+
+    /* Print the current token */
+    printf ("token[%d]: %s\n",
+    count, s);
+
+    /* Get the next token until end of string */
+    s = strtok_r (NULL, " ", &buf_pp);
+  }
+  printf ("Done.\n");
+  
+  //tokeniser(ins); 
+  return EXIT_SUCCESS;
 }
