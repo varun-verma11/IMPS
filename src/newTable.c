@@ -18,6 +18,7 @@ struct Table {
 };
 
 void addToTable(char *key, int value, struct Table *table) {
+printf("%d\n",value);
   struct Table_Elem new_elem;
   new_elem.key = key;
   new_elem.value = value;
@@ -29,6 +30,7 @@ int getValue(char *key, struct Table *table) {
   struct Table_Elem *current = table->head;
   
   while(current!=NULL) {
+    printf("getValue check ---->  %d\n",current->value);
     if (strcmp(key,current->key)==0) return current->value;
     current = current->next;
   }
@@ -39,11 +41,12 @@ struct Table *initialiseSymbolTable(void) {
   struct Table *table= malloc(sizeof(struct Table));
   table->head = NULL;
   addToTable("halt",0,table);
+  addToTable("add",1,table);
   return table;
 }
 
 int main(void) {
   struct Table *symbolTable = initialiseSymbolTable();
-  printf("halt  ----> %d \n",getValue("halt",symbolTable));
+  printf("add  ----> %d \n",getValue("add",symbolTable));
   return EXIT_SUCCESS;
 }
