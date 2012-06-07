@@ -18,19 +18,18 @@ struct Table {
 };
 
 void addToTable(char *key, int value, struct Table *table) {
-printf("%d\n",value);
-  struct Table_Elem new_elem;
-  new_elem.key = key;
-  new_elem.value = value;
-  new_elem.next = table->head;
-  table->head = &new_elem;
+  struct Table_Elem *new_elem = (struct Table_Elem *) malloc(sizeof(struct Table_Elem));
+	new_elem->key = key;
+  new_elem->value = value;
+  new_elem->next = table->head;
+  table->head = new_elem;
 }
 
 int getValue(char *key, struct Table *table) {
   struct Table_Elem *current = table->head;
   
   while(current!=NULL) {
-    printf("getValue check ---->  %d\n",current->value);
+    printf("key   ----> %s     Value ----> %d \n",current->key,current->value);
     if (strcmp(key,current->key)==0) return current->value;
     current = current->next;
   }
@@ -38,15 +37,32 @@ int getValue(char *key, struct Table *table) {
 }
 
 struct Table *initialiseSymbolTable(void) {
-  struct Table *table= malloc(sizeof(struct Table));
+  struct Table *table = (struct Table *) malloc(sizeof(struct Table));
   table->head = NULL;
   addToTable("halt",0,table);
-  addToTable("add",1,table);
+  addToTable("add", 1,table);
+  addToTable("addi",2,table);
+  addToTable("sub",3,table);
+  addToTable("subi",4,table);
+  addToTable("mul",5,table);
+  addToTable("muli",6,table);
+  addToTable("lw",7,table);
+  addToTable("sw",8,table);
+  addToTable("beq",9,table);
+  addToTable("bne",10,table);
+  addToTable("blt",11,table);
+  addToTable("bgt",12,table);
+  addToTable("ble",13,table);
+  addToTable("bge",14,table);
+  addToTable("jmp",15,table);
+  addToTable("jr",16,table);
+  addToTable("jal",17,table);
+  addToTable("out",18,table);
   return table;
 }
 
 int main(void) {
   struct Table *symbolTable = initialiseSymbolTable();
-  printf("add  ----> %d \n",getValue("add",symbolTable));
+  printf("halt ----> %d \n",getValue("halt",symbolTable));
   return EXIT_SUCCESS;
 }
