@@ -34,9 +34,11 @@ int checkHex(char *reg){
 }
 
 int checkLabel(char *reg){
- if(strlen(reg)){
- return 0;
- }
+ //if(strlen(&reg)){
+  if((strcmp(reg[0],'a')>=0 && strcmp(reg[0],'z'))||  (strcmp(reg[0],'A')>=0 && strcmp(reg[0],'Z'))){
+  return 1;
+ }else{
+  return 0}
 }
 
 
@@ -71,7 +73,7 @@ uint32_t parser_j(char **tokens){
  uint32_t reg2Opcode = reg2<<16;
  if(checkHex(tokens[3])){
   immediateValue = (uint32_t) *tokens[3];
- } else if(checkLabel(tokens[3])){
+ } else if(checkLabel(&tokens[3])){
   immediateValue = (int) getValuetokens[3]);
  }else{
   immediateValue = (int) *tokens[3];
