@@ -19,7 +19,6 @@ enum opCodes {HALT=0, ADD, ADDI, SUB, SUBI, MUL, MULI, LW, SW, BEQ, BNE, BLT, BG
 struct Table_Elem {
   int value;
   struct Table_Elem *next;
-  uint32_t (*parser) (char **, struct Table *);
   char *key;
 };
 
