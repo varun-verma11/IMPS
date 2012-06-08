@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-
+#include "assemble.h"
 
 int getRegisterNumber(char *reg){
   char *regNumber = malloc(sizeof(char) *2);
@@ -32,25 +28,16 @@ int checkLabel(char *reg){
   return 0; 
 }
 
-
-/*
-int convertOpcode(char *tokens){
-  int convertedOpcode = (int) getValue(tokens[0]);
-  return convertedOpcode;
-}
-*/
-
-uint32_t parser_r(char **tokens){
-   //2 registers saved into a given register
-   uint32_t opcode = getValue(tokens[0]);;
-   uint32_t reg1Opcode = getRegisterNumber(tokens[1]) <<21;
-   uint32_t reg2Opcode = getRegisterNumber(tokens[2])<<16;
-   uint32_t reg3Opcode = getRegisterNumber(tokens[3])<<11;
-   return (opcode + reg1Opcode + reg2Opcode + reg3Opcode); 
+uint32_t parser_r(char **tokens, struct Table *table){
+  uint32_t opcode = getValue(tokens[0],table)<<26;;
+  uint32_t reg1Opcode = getRegisterNumber(tokens[1]) <<21;
+  uint32_t reg2Opcode = getRegisterNumber(tokens[2])<<16;
+  uint32_t reg3Opcode = getRegisterNumber(tokens[3])<<11;
+  return (opcode + reg1Opcode + reg2Opcode + reg3Opcode); 
 }
 
-uint32_t parser_i(char **tokens,struct Table table){
-  uint32_t opcode = getValue(token[0],table)<<26;
+uint32_t parser_i(char **tokens,struct Table *table){
+  uint32_t opcode = getValue(tokens[0],table)<<26;
   uint32_t immediateValue;
   uint32_t reg1Opcode = getRegisterNumber(tokens[1])<<21;
   uint32_t reg2Opcode = getRegisterNumber(tokens[2])<<16;
@@ -67,34 +54,11 @@ uint32_t parser_i(char **tokens,struct Table table){
 
 uint32_t parser_j(char **tokens, struct Table *table){
   uint32_t address;
-  uint32_t opcode = getValue(token[0],table)<<26;
+  uint32_t opcode = getValue(tokens[0],table)<<26;
   if(checkLabel(tokens[1])){
-    address = getValue(token[1],table);
+    address = getValue(tokens[1],table);
   } else {
     address = *tokens[1];
   }
   return address+opcode;
 }
-
-
-
-int main(void){
-  printf("Hi\n");
-  struct Table *table = initialiseSymbolTable();
-  printf("%d\n",getValue("add",table));
-
-  char **tokens ={"add","$1","$2","$3"};
-  printf("jose");
-  uint32_t ins = parser_r(tokens);
-
-  printf("%d\n",ins);
-  return EXIT_SUCCESS;
-}
-
- 
-
-
-
-
-
-

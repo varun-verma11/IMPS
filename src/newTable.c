@@ -1,21 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <assert.h>
-
-#define BUFFER_SIZE 300
-#define MEMORY_SIZE 65536
-
-struct Table_Elem {
-  int value;
-  struct Table_Elem *next;
-  char *key;
-};
-
-struct Table {
-  struct Table_Elem *head;
-};
+#include "assemble.h"
 
 void addToTable(char *key, int value, struct Table *table) {
   struct Table_Elem *new_elem = (struct Table_Elem *) malloc(sizeof(struct Table_Elem));
@@ -26,8 +9,7 @@ void addToTable(char *key, int value, struct Table *table) {
 }
 
 int getValue(char *key, struct Table *table) {
-  struct Table_Elem *current = table->head;
-  
+  struct Table_Elem *current = table->head;  
   while(current!=NULL) {
     printf("key   ----> %s     Value ----> %d \n",current->key,current->value);
     if (strcmp(key,current->key)==0) return current->value;
@@ -59,10 +41,4 @@ struct Table *initialiseSymbolTable(void) {
   addToTable("jal",17,table);
   addToTable("out",18,table);
   return table;
-}
-
-int main(void) {
-  struct Table *symbolTable = initialiseSymbolTable();
-  printf("halt ----> %d \n",getValue("halt",symbolTable));
-  return EXIT_SUCCESS;
 }

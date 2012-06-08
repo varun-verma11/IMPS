@@ -1,7 +1,4 @@
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
+#include <assemble.h>
 
 void tokeniser(char *instruction, char **tokens) {
   char *buf_pp = NULL;
@@ -14,6 +11,7 @@ void tokeniser(char *instruction, char **tokens) {
   } while (tokens[count]!=NULL);
   printf("token --> %s \n",tokens[count]);
 }
+
 
 int main(void) {
   //char **token = (char **) malloc(sizeof(char *) *5);
