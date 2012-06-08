@@ -46,6 +46,7 @@ uint32_t parser_i(char **tokens,struct Table table){
     immediateValue = atoi(tokens[3]);
   }
   return (opcode + reg1Opcode + reg2Opcode + immediateValue);
+
 }
 
 

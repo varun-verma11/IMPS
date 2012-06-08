@@ -3,6 +3,17 @@
 #include <stdio.h>
 
 
+void tokeniser(char *instruction, char **tokens) {
+  char *buf_pp = NULL;
+  int count =0;
+  tokens[count] = strtok_r(instruction, ":", &buf_pp);
+  do {
+    printf("token --> %s \n",tokens[count]);
+    count++;
+    tokens[count] = strtok_r(NULL, " ", &buf_pp);
+  } while (tokens[count]!=NULL);
+  printf("token --> %s \n",tokens[count]);
+}
 
 int main(void) {
   //char **token = (char **) malloc(sizeof(char *) *5);
@@ -15,14 +26,8 @@ int main(void) {
   s = strtok_r (ip_addr, ":", &buf_pp);
 
   while (s) {
-    /* Increment count */
     count++;
-
-    /* Print the current token */
-    printf ("token[%d]: %s\n",
-    count, s);
-
-    /* Get the next token until end of string */
+    printf ("token[%d]: %s \n", count, s);
     s = strtok_r (NULL, " ", &buf_pp);
   }
   printf ("Done.\n");
