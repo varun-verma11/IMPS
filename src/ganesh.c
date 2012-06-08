@@ -1,23 +1,28 @@
 #include "assemble.h"
+#include <string.h>
 
-void tokeniser(char *instruction, char **tokens) {
-  char *buf_pp = NULL;
-  char *labelDelim = ":";
+#define ASCII_FOR_COLON 58
+
+void tokeniser(char *instruction,char *tokens[4]) {
+  char *token;
   int count =0;
-  tokens[count] = strtok_r(instruction,":" , &buf_pp);
+  token = strtok(instruction, ":");
   do {
-    printf("token --> %s \n",tokens[count]);
+    token = strtok(NULL, " ");
+    tokens[count] = token;
     count++;
-    tokens[count] = strtok_r(NULL, " ", &buf_pp);
-  } while (tokens[count]!=NULL);
+  } while (count!=5);
 }
 
+char *getLabel(char *instruction) {
+  return (strchrnul(instruction,58)!=NULL) ? strtok(instruction,":") : NULL;
+}
 
 int main(void) {
-  char **token = malloc(sizeof(char *) *5);
-  
+  char ins[] = "add $1 $2 $3";
+  char *tokens[4];
+  /*
   static char ip_addr[] = "label: add $1 $2 $3";
-  char *ins = "label: add $1 $2 $3";
   static char inst[] = *ins;
   char *buf_pp = NULL;
   char *s = NULL;
@@ -30,8 +35,18 @@ int main(void) {
     printf ("token[%d]: %s \n", count, s);
     s = strtok_r (NULL, " ", &buf_pp);
   }
-  printf ("Done.\n");
+  printf ("Done.\n\n\n\");
+  */
   
-  tokeniser(inst, token); 
+  char *inscpy = malloc(sizeof(ins));
+  inscpy = strcpy(inscpy,ins);
+  
+  int count =0;
+  printf("label   ---> %s \n",getLabel(inscpy));
+  tokeniser(ins,tokens);  
+  while (count!=4) {
+    printf("token %i --> %s \n",count,tokens[count]);
+    count++;
+  }
   return EXIT_SUCCESS;
 }
