@@ -36,6 +36,10 @@ uint32_t parser_r(char **tokens, struct Table *table){
   return (opcode + reg1Opcode + reg2Opcode + reg3Opcode); 
 }
 
+uint32_t parser_halt(char **tokens,struct Table *table) {
+  return 0x0;
+}
+
 uint32_t parser_i(char **tokens,struct Table *table){
   uint32_t opcode = getValue(tokens[0],table)<<26;
   uint32_t immediateValue;

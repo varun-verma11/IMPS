@@ -29,11 +29,15 @@ int checkLabel(char *reg){
 }
 
 uint32_t parser_r(char **tokens, struct Table *table){
-  uint32_t opcode = getValue(tokens,table)<<26;;
+  uint32_t opcode = getValue(tokens[0],table)<<26;;
   uint32_t reg1Opcode = getRegisterNumber(tokens[1]) <<21;
   uint32_t reg2Opcode = getRegisterNumber(tokens[2])<<16;
   uint32_t reg3Opcode = getRegisterNumber(tokens[3])<<11;
   return (opcode + reg1Opcode + reg2Opcode + reg3Opcode); 
+}
+
+uint32_t parser_halt(char **tokens,struct Table *table) {
+  return 0x0;
 }
 
 uint32_t parser_i(char **tokens,struct Table *table){
