@@ -2,21 +2,23 @@
 
 void tokeniser(char *instruction, char **tokens) {
   char *buf_pp = NULL;
+  char *labelDelim = ":";
   int count =0;
-  tokens[count] = strtok_r(instruction, ":", &buf_pp);
+  tokens[count] = strtok_r(instruction,":" , &buf_pp);
   do {
     printf("token --> %s \n",tokens[count]);
     count++;
     tokens[count] = strtok_r(NULL, " ", &buf_pp);
   } while (tokens[count]!=NULL);
-  printf("token --> %s \n",tokens[count]);
 }
 
 
 int main(void) {
-  //char **token = (char **) malloc(sizeof(char *) *5);
+  char **token = malloc(sizeof(char *) *5);
   
   static char ip_addr[] = "label: add $1 $2 $3";
+  char *ins = "label: add $1 $2 $3";
+  static char inst[] = *ins;
   char *buf_pp = NULL;
   char *s = NULL;
   int count = 0;
@@ -30,6 +32,6 @@ int main(void) {
   }
   printf ("Done.\n");
   
-  //tokeniser(ins); 
+  tokeniser(inst, token); 
   return EXIT_SUCCESS;
 }
