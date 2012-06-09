@@ -9,8 +9,7 @@ void addToTable(char *key, int value, struct Table *table) {
 }
 
 int getValue(char *key, struct Table *table) {
-  struct Table_Elem *current = table->head;
-  
+  struct Table_Elem *current = table->head;  
   while(current!=NULL) {
     printf("key   ----> %s     Value ----> %d \n",current->key,current->value);
     if (strcmp(key,current->key)==0) return current->value;
