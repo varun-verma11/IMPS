@@ -9,14 +9,14 @@ int checkLabel(char *instruction) {
 
 void tokeniserWithoutLabel(char *instruction,char *tokens[5]) {
   char *token;
-  int count =0;
+  int count =1;
   token = strtok(instruction, " ");
   tokens[count] = token;
   do {
     count++;
     token = strtok(NULL, " ");
     tokens[count] = token;
-  } while (count!=3);
+  } while (count!=5);
 }
 
 void tokeniserWithLabel(char *instruction,char *tokens[5]) {
@@ -24,10 +24,10 @@ void tokeniserWithLabel(char *instruction,char *tokens[5]) {
   int count =0;
   token = strtok(instruction, ":");
   do {
-    token = strtok(NULL, " ");
     tokens[count] = token;
+    token = strtok(NULL, " ");
     count++;
-  } while (count!=4);
+  } while (count!=5);
 }
 
 void tokeniser(char *instruction, char *tokens[5]) {
@@ -59,7 +59,7 @@ int main(void) {
   printf ("Done.\n\n\n\");
   */
   tokeniser(ins,tokens);  
-  while (count!=4) {
+  while (count!=5) {
     printf("token %i --> %s \n",count,tokens[count]);
     count++;
   }
