@@ -1,6 +1,6 @@
 #include "assemble.h"
 
-uint32_t getBin(char *tokens[5], struct Table *table, uint32_t addr){
+uint32_t pass2(char *tokens[5], struct Table *table, uint32_t addr){
     if (strcmp(tokens[1],".fill")) {
       addToTable(tokens[0],atoi(tokens[2]);
       return atoi(tokens[2]);

@@ -38,6 +38,18 @@ void tokeniser(char *instruction, char *tokens[5]) {
   }
 }
 
+char *getLabel(char *instruction) {
+  char *inscpy = malloc(sizeof(instruction));
+  inscpy =strcpy(inscpy,instruction);
+  return strtok(instruction,":");
+}
+
+void pass1(char *instruction,uinst32_t addr, struct Table *table) {
+  if (checkLabel(instruction)) {
+    addToTable(getLabel(instruction),addr);
+  }
+}
+
 int main(void) {
   char ins[] = "label: add $1 $2 $3";
   char *tokens[5];
