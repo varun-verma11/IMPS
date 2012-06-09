@@ -8,7 +8,8 @@ uint32_t parse_fill(char **tokens, struct Table table) {
   
 }
 
-int skip(char **tokens) {
+
+ skip(char **tokens) {
  return atoi(tokens[2]);
 }
 
