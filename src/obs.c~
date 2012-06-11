@@ -287,8 +287,7 @@ int main(int argc, char **argv) {
   struct Table *table = malloc(sizeof(struct Table));
   table = initialiseSymbolTable();
   uint32_t address = 0;
-  data->number_of_instructions = 0;
-  
+  data->number_of_instructions = 0;  
   char *readFP = argv[1];
   //char *writeFP = argv[2];
   
@@ -327,6 +326,7 @@ int main(int argc, char **argv) {
     if (data->a_instruction == NULL) break;
     char *tokens[5];
     tokeniser(data->a_instruction,tokens);
+    printf("ins check %i--> %s\n",i,data->a_instruction);
     if (strcmp(".skip",tokens[0])==0) {
       data->b_instruction = 0;
       printBits(0);
@@ -344,6 +344,7 @@ int main(int argc, char **argv) {
     data->b_instruction = pass2(tokens,table,address);
     printBits(data->b_instruction);
     printf("\t%s\n", data->a_instruction);
+    
     address += 4;
     i++;
     //writeToFile(fWrite,data->b_instruction);

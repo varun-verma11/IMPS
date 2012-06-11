@@ -341,6 +341,7 @@ int main(int argc, char **argv) {
       goto endWhile ;
     }
     data->b_instruction = pass2(tokens,table,address);
+    printf("ins check %i--> %s\n",i,data->a_instruction);
     printBits(data->b_instruction);
     printf("\t%s\n", data->a_instruction);
     
