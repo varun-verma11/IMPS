@@ -287,7 +287,8 @@ int main(int argc, char **argv) {
   struct Table *table = malloc(sizeof(struct Table));
   table = initialiseSymbolTable();
   uint32_t address = 0;
-  data->number_of_instructions = 0;  
+  data->number_of_instructions = 0;
+  
   char *readFP = argv[1];
   //char *writeFP = argv[2];
   
@@ -343,7 +344,6 @@ int main(int argc, char **argv) {
     data->b_instruction = pass2(tokens,table,address);
     printBits(data->b_instruction);
     printf("\t%s\n", data->a_instruction);
-    
     address += 4;
     i++;
     //writeToFile(fWrite,data->b_instruction);
