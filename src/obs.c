@@ -9,7 +9,7 @@
 
 struct Data {
   char *a_instruction;
-  uint32_t b_instructions[MEMORY_SIZE];
+  uint32_t b_instruction;
   int number_of_instructions;
 };
 
@@ -37,7 +37,6 @@ void addToTable(char *key, int value, struct Table *table) {
 int getValue(char *key, struct Table *table) {
   struct Table_Elem *current = table->head;  
   while(current!=NULL) {
-    printf("key   ----> %s     Value ----> %d \n",current->key,current->value);
     if (strcmp(key,current->key)==0) return current->value;
     current = current->next;
   }
@@ -98,42 +97,29 @@ void tokeniserWithLabel(char *instruction,char *tokens[5]) {
 }
 
 void tokeniser(char *instruction, char *tokens[5]) {
-  if(checkLabelExists(instruction)) {
-    tokeniserWithLabel(instruction,tokens);
+  char *inscpy = (char *) malloc(sizeof(instruction));
+  inscpy =strcpy(inscpy,instruction);
+  if(checkLabelExists(inscpy)) {
+    tokeniserWithLabel(inscpy,tokens);
   } else {
-    tokeniserWithoutLabel(instruction,tokens);
+    tokeniserWithoutLabel(inscpy,tokens);
   }
 }
 
 char *getLabel(char *instruction) {
-  char *inscpy = malloc(sizeof(instruction));
+  char *inscpy = (char *) malloc(sizeof(instruction));
   inscpy =strcpy(inscpy,instruction);
-  return strtok(instruction,":");
+  return strtok(inscpy,":");
 }
 
 void readFromFile(FILE *fp, struct Data *data) {
-  char buffer[BUFFER_SIZE];
-  if (fgets(buffer,sizeof(buffer), fp) == NULL) return;
+  char *buffer = (char *) malloc(BUFFER_SIZE * sizeof(char));
+  if (fgets(buffer,BUFFER_SIZE, fp) == NULL) return;
   data->a_instruction = buffer;
 }
 
-void writeToFile(char *filepath, struct Data *data) { 
-  FILE *fp;
-  fp = fopen(filepath, "wb");
-  /*check if needed*/
-  if (fp==NULL) {
-    perror("Error is writing to file");
-    exit(EXIT_FAILURE);
-  }
-	int num_of_elem_written = 0;
-  int num_of_elem = data->number_of_instructions;
-	num_of_elem_written = fwrite((data->b_instructions),sizeof(uint32_t), num_of_elem, fp);
-	
-	if (num_of_elem_written != num_of_elem) {
-		perror("ERROR IN WRITING TO FILE");
-		exit(EXIT_FAILURE);
- 	}
-  fclose(fp);
+void writeToFile(FILE *fp, uint32_t ins) {
+  fwrite(&ins,sizeof(uint32_t), 1, fp);
 }
 
 char getOptype(char *opcode) {
@@ -291,8 +277,6 @@ uint32_t pass2(char *tokens[5], struct Table *table, uint32_t addr){
 }
 
 void pass1(char *instruction, uint32_t addr, struct Table *table) {
-  printf("pass 1 start \t");
-  printf("address --> %i ; instruction --> %s \n",addr, instruction); 
   if (checkLabelExists(instruction)) {
     addToTable(getLabel(instruction),addr,table);
   }
@@ -307,64 +291,68 @@ int main(int argc, char **argv) {
   data->number_of_instructions = 0;
   
   char *readFP = argv[1];
-  //char *writeFP = argv[2];
+  char *writeFP = argv[2];
   
   //int current_instruction = 0;
 
 
   //start pass 1+
-  FILE *fp = fopen(readFP,"r");
-  if (fp==NULL) {
+  FILE *fRead = fopen(readFP,"r");
+  if (fRead==NULL) {
     perror("Error is reading from file");
     exit(EXIT_FAILURE);
   }
   
-
+  
   do {    
     data->a_instruction = NULL;
-    readFromFile(fp,data);
+    readFromFile(fRead,data);
     if (data->a_instruction == NULL) break;
-    printf("pass1(%s, %i,table) \n", data->a_instruction, address);
     pass1(data->a_instruction,address,table);
     address += 4;
     data->number_of_instructions++;
-  } while(feof(fp)==0);
-  printf("end f read \n");
-  printf("%i \n",data->number_of_instructions);
-  fclose(fp);
+    free(data->a_instruction);
+  } while(feof(fRead)==0);
+  printf("end of pass 1 \n");
+
   //end pass 1
 
-
-
-
-
-  /*
-  current_instruction = 0;
+  rewind(fRead);
+  FILE *fWrite = fopen(writeFP,"w");
   int i = 0;
   address = 0;
   //start pass2
-  while(current_instruction <= data->number_of_instructions ) {
+  while(feof(fRead)==0) {
+    data->a_instruction = NULL;
+    readFromFile(fRead,data);
+    if (data->a_instruction == NULL) break;
     char *tokens[5];
     tokeniser(data->a_instruction,tokens);
     if (strcmp(".skip",tokens[0])==0) {
-      memset(&data->b_instructions[i], 0, sizeof(uint32_t)*atoi(tokens[2]));
       printBits(0);
-      printf("    %s\n", data->a_instruction[current_instruction]);
+      writeToFile(fWrite,data->b_instruction);
+      printf("\t%s\n", data->a_instruction);
       for(int j = 1; j<=atoi(tokens[2]);j++) {
         printBits(0);
+        writeToFile(fWrite,data->b_instruction);
       }
       printf("\n");
       i += atoi(tokens[2]);
+      address = (i-1)*4;
       goto endWhile ;
-    }
-    data->b_instructions[i] = pass2(tokens,table,address);
-    printBits(data->b_instructions[i]);
-    printf("    %s\n", data->a_instruction[current_instruction]);
-    current_instruction++;
+    }    
+    free(data->a_instruction);
+    data->b_instruction = pass2(tokens,table,address);
+    printBits(data->b_instruction);
+    printf("\t%s\n", data->a_instruction);
     address += 4;
     i++;
+    writeToFile(fWrite,data->b_instruction);
     endWhile: ;
   }
-  writeToFile(writeFP,data);
-*/
+  writeToFile(fWrite,data->b_instruction);
+  
+  fclose(fWrite);
+  fclose(fRead);
+
 }
