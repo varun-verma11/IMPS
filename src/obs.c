@@ -8,7 +8,7 @@
 #define MEMORY_SIZE 65536
 
 struct Data {
-  char *a_instructions[MEMORY_SIZE];
+  char *a_instruction;
   uint32_t b_instructions[MEMORY_SIZE];
   int number_of_instructions;
 };
@@ -111,30 +111,10 @@ char *getLabel(char *instruction) {
   return strtok(instruction,":");
 }
 
-void pass1(char *instruction,uint32_t addr, struct Table *table) {
-  if (checkLabelExists(instruction)) {
-    addToTable(getLabel(instruction),addr,table);
-  }
-}
-
-void readFromFile(char *filepath, struct Data *data) {
-  FILE *fp;
-  fp = fopen(filepath, "r");
-  if (fp==NULL) {
-    perror("Error is writing to file");
-    exit(EXIT_FAILURE);
-  }
+void readFromFile(FILE *fp, struct Data *data) {
   char buffer[BUFFER_SIZE];
-  int i=0;
-  while((feof(fp)==0) && (i<MEMORY_SIZE)) {
-    fgets(buffer,sizeof(buffer), fp);
-    data->a_instructions[i] = buffer;
-    printf("%s",buffer);
-    memset(buffer,' ' , sizeof(buffer));
-    i++;    
-  }
-  data ->number_of_instructions = i -1;
-  fclose(fp); 
+  if (fgets(buffer,sizeof(buffer), fp) == NULL) return;
+  data->a_instruction = buffer;
 }
 
 void writeToFile(char *filepath, struct Data *data) { 
@@ -310,6 +290,14 @@ uint32_t pass2(char *tokens[5], struct Table *table, uint32_t addr){
     }
 }
 
+void pass1(char *instruction, uint32_t addr, struct Table *table) {
+  printf("pass 1 start \t");
+  printf("address --> %i ; instruction --> %s \n",addr, instruction); 
+  if (checkLabelExists(instruction)) {
+    addToTable(getLabel(instruction),addr,table);
+  }
+}
+
 int main(int argc, char **argv) {
   assert("Wrong Number of arguments" && argc==3);
   struct Data *data = malloc(sizeof(struct Data));
@@ -319,36 +307,49 @@ int main(int argc, char **argv) {
   data->number_of_instructions = 0;
   
   char *readFP = argv[1];
-  char *writeFP = argv[2];
+  //char *writeFP = argv[2];
   
-  int current_instruction = 0;
-  
-  readFromFile(readFP,data);
-  printf("%i \n",data->number_of_instructions);
-  while(current_instruction <= data->number_of_instructions ) {
-    pass1(data->a_instructions[current_instruction],address,table);
-    current_instruction++;
-    address += 4;
-  } 
-  printf("start Loop\n");
-  int c = 0;
-  while(c <data->number_of_instructions) {
-    printf("%s \n",data->a_instructions[c]);
-    c++;
+  //int current_instruction = 0;
+
+
+  //start pass 1+
+  FILE *fp = fopen(readFP,"r");
+  if (fp==NULL) {
+    perror("Error is reading from file");
+    exit(EXIT_FAILURE);
   }
-  printf("endLoop\n");
   
+
+  do {    
+    data->a_instruction = NULL;
+    readFromFile(fp,data);
+    if (data->a_instruction == NULL) break;
+    printf("pass1(%s, %i,table) \n", data->a_instruction, address);
+    pass1(data->a_instruction,address,table);
+    address += 4;
+    data->number_of_instructions++;
+  } while(feof(fp)==0);
+  printf("end f read \n");
+  printf("%i \n",data->number_of_instructions);
+  fclose(fp);
+  //end pass 1
+
+
+
+
+
+  /*
   current_instruction = 0;
   int i = 0;
   address = 0;
   //start pass2
   while(current_instruction <= data->number_of_instructions ) {
     char *tokens[5];
-    tokeniser(data->a_instructions[current_instruction],tokens);
+    tokeniser(data->a_instruction,tokens);
     if (strcmp(".skip",tokens[0])==0) {
       memset(&data->b_instructions[i], 0, sizeof(uint32_t)*atoi(tokens[2]));
       printBits(0);
-      printf("    %s\n", data->a_instructions[current_instruction]);
+      printf("    %s\n", data->a_instruction[current_instruction]);
       for(int j = 1; j<=atoi(tokens[2]);j++) {
         printBits(0);
       }
@@ -358,11 +359,12 @@ int main(int argc, char **argv) {
     }
     data->b_instructions[i] = pass2(tokens,table,address);
     printBits(data->b_instructions[i]);
-    printf("    %s\n", data->a_instructions[current_instruction]);
+    printf("    %s\n", data->a_instruction[current_instruction]);
     current_instruction++;
     address += 4;
     i++;
     endWhile: ;
   }
   writeToFile(writeFP,data);
+*/
 }
