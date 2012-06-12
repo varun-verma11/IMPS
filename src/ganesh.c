@@ -44,14 +44,8 @@ char *getLabel(char *instruction) {
   return strtok(instruction,":");
 }
 
-void pass1(char *instruction,uinst32_t addr, struct Table *table) {
-  if (checkLabel(instruction)) {
-    addToTable(getLabel(instruction),addr);
-  }
-}
-
 int main(void) {
-  char ins[] = "label: add $1 $2 $3";
+  char ins[] = "end:    sw    $2 $0 result ";
   char *tokens[5];
   int count = 0;
   /*

@@ -97,7 +97,7 @@ void tokeniserWithLabel(char *instruction,char *tokens[5]) {
 }
 
 void tokeniser(char *instruction, char *tokens[5]) {
-  char *inscpy = (char *) malloc(sizeof(instruction));
+  char *inscpy = (char *) malloc(sizeof(char) * strlen(instruction));
   inscpy =strcpy(inscpy,instruction);
   if(checkLabelExists(inscpy)) {
     tokeniserWithLabel(inscpy,tokens);
@@ -185,13 +185,14 @@ uint32_t parse_fill(char **tokens, struct Table table) {
 }
 
 int getRegisterNumber(char *reg){
-  char *regNumber = (char *) malloc(sizeof(char) *2);
+  /*char *regNumber = (char *) malloc(sizeof(char) *2);
   for(int i = 0; ; i++){
      if(i >= strlen(reg)) break;
      regNumber[i] = reg[i+1];
-  }
-  return atoi(regNumber);
-
+  }*/
+  return atoi(reg+1);
+  
+  //return atoi(reg + 1);
 }
 
 int checkLabel(char *reg){
@@ -213,10 +214,6 @@ uint32_t parser_r(char **tokens, struct Table *table){
 	return (opcode + reg1Opcode + reg2Opcode + reg3Opcode);
 }
 
-uint32_t parser_halt(char **tokens,struct Table *table) {
-  return 0x0;
-}
-
 uint32_t parser_i(char **tokens,struct Table *table){
   uint32_t opcode = getValue(tokens[0],table)<<26;
   uint32_t immediateValue;
@@ -225,7 +222,7 @@ uint32_t parser_i(char **tokens,struct Table *table){
 
   if(checkHex(tokens[3])){
     immediateValue = (int) strtol(tokens[3],NULL,16);
-  } else if(checkLabel(tokens[3])){
+  } else if(checkLabel(tokens[3])) {
     immediateValue = (int) getValue(tokens[3], table);
   }else{
     immediateValue = atoi(tokens[3]);
@@ -257,8 +254,7 @@ void printBits(uint32_t x) {
 }
 
 uint32_t pass2(char *tokens[5], struct Table *table, uint32_t addr){
-   if (strcmp(tokens[1],".fill")==0) { 
-      addToTable(tokens[0],atoi(tokens[2]), table);
+   if (strcmp(tokens[1],".fill")==0) {
       return atoi(tokens[2]);
     }
     ++tokens;
@@ -273,7 +269,7 @@ uint32_t pass2(char *tokens[5], struct Table *table, uint32_t addr){
     	return parser_j(tokens, table);
     }
     else{
-     return 0x0;
+      return 0x0;
     }
 }
 
@@ -313,7 +309,6 @@ int main(int argc, char **argv) {
     data->number_of_instructions++;
     free(data->a_instruction);
   } while(feof(fRead)==0);
-  printf("end of pass 1 \n");
 
   //end pass 1
 
@@ -328,27 +323,28 @@ int main(int argc, char **argv) {
     if (data->a_instruction == NULL) break;
     char *tokens[5];
     tokeniser(data->a_instruction,tokens);
-    if (strcmp(".skip",tokens[0])==0) {
+    if (strcmp(".skip",tokens[1])==0) {
       data->b_instruction = 0;
       printBits(0);
       writeToFile(fWrite,data->b_instruction);
-      printf("\t%s\n", data->a_instruction);
-      for(int j = 1; j<=atoi(tokens[2]);j++) {
+      printf("\t%s", data->a_instruction);
+      int j = atoi(tokens[2]) - 1;
+      while (j>=1) {
         printBits(0);
         writeToFile(fWrite,data->b_instruction);
+        printf("\n");
+        --j;
       }
-      printf("\n");
       i += atoi(tokens[2]);
-      address = (i-1)*4;
-      goto endWhile ;
+      address = i*4;
+    } else {
+      data->b_instruction = pass2(tokens,table,address);
+      printBits(data->b_instruction);
+      printf("\t%s", data->a_instruction);    
+      address += 4;
+      i++;
+      writeToFile(fWrite,data->b_instruction); 
     }
-    data->b_instruction = pass2(tokens,table,address);
-    printBits(data->b_instruction);
-    printf("\t%s\n", data->a_instruction);    
-    address += 4;
-    i++;
-    writeToFile(fWrite,data->b_instruction);
-    endWhile: ;
   }  
   fclose(fWrite);
   fclose(fRead);

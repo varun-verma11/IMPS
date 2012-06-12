@@ -7,7 +7,11 @@ CFLAGS  = -Wall
 
 all: assemble emulate
 
-assemble: assemble.o
+assemble.o: assemble.c a.h 
+
+b.o: b.c a.h
+
+assemble: assemble.o a.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 emulate: emulate.o
