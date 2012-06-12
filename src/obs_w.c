@@ -185,14 +185,11 @@ uint32_t parse_fill(char **tokens, struct Table table) {
 }
 
 int getRegisterNumber(char *reg){
-  char *regNumber = malloc(sizeof(char) *2);
-  //printf("%s \n", reg);
+  char *regNumber = (char *) malloc(sizeof(char) *2);
   for(int i = 0; ; i++){
      if(i >= strlen(reg)) break;
      regNumber[i] = reg[i+1];
-     //printf("%s\n", regNumber);
   }
-  //printf("%s \n",regNumber);
   return atoi(regNumber);
 
 }
@@ -205,20 +202,15 @@ int checkLabel(char *reg){
   return 0; 
 }
 int checkRegister(char *token){
- return (token[1]=='$');
+ return (token!=NULL) ? (token[0]=='$') : 0;
 }
 
 uint32_t parser_r(char **tokens, struct Table *table){
   uint32_t opcode = getValue(tokens[0],table)<<26;
-  if(checkRegister(tokens[1])&&checkRegister(tokens[2])&&checkRegister(tokens[3])){
-	  uint32_t reg1Opcode = getRegisterNumber(tokens[1]) <<21;
-	  uint32_t reg2Opcode = getRegisterNumber(tokens[2])<<16;
-	  uint32_t reg3Opcode = getRegisterNumber(tokens[3])<<11;
-	  return (opcode + reg1Opcode + reg2Opcode + reg3Opcode);
-  } 
-  else {
-  return 0;
-  }
+	uint32_t reg1Opcode = (checkRegister(tokens[1])) ? getRegisterNumber(tokens[1]) <<21 : 0;
+	uint32_t reg2Opcode = (checkRegister(tokens[2])) ? getRegisterNumber(tokens[2]) <<16 : 0;
+	uint32_t reg3Opcode = (checkRegister(tokens[3])) ? getRegisterNumber(tokens[3]) <<11 : 0;
+	return (opcode + reg1Opcode + reg2Opcode + reg3Opcode);
 }
 
 uint32_t parser_halt(char **tokens,struct Table *table) {
@@ -299,7 +291,7 @@ int main(int argc, char **argv) {
   uint32_t address = 0;
   data->number_of_instructions = 0;  
   char *readFP = argv[1];
-  //char *writeFP = argv[2];
+  char *writeFP = argv[2];
   
   //int current_instruction = 0;
 
@@ -326,7 +318,7 @@ int main(int argc, char **argv) {
   //end pass 1
 
   rewind(fRead);
-  //FILE *fWrite = fopen(writeFP,"w");
+  FILE *fWrite = fopen(writeFP,"w");
   int i = 0;
   address = 0;
   //start pass2
@@ -339,11 +331,11 @@ int main(int argc, char **argv) {
     if (strcmp(".skip",tokens[0])==0) {
       data->b_instruction = 0;
       printBits(0);
-      //writeToFile(fWrite,data->b_instruction);
+      writeToFile(fWrite,data->b_instruction);
       printf("\t%s\n", data->a_instruction);
       for(int j = 1; j<=atoi(tokens[2]);j++) {
         printBits(0);
-        //writeToFile(fWrite,data->b_instruction);
+        writeToFile(fWrite,data->b_instruction);
       }
       printf("\n");
       i += atoi(tokens[2]);
@@ -351,17 +343,13 @@ int main(int argc, char **argv) {
       goto endWhile ;
     }
     data->b_instruction = pass2(tokens,table,address);
-    printf("ins check %i--> %s\n",i,data->a_instruction);
     printBits(data->b_instruction);
-    printf("\t%s\n", data->a_instruction);
-    
+    printf("\t%s\n", data->a_instruction);    
     address += 4;
     i++;
-    //writeToFile(fWrite,data->b_instruction);
+    writeToFile(fWrite,data->b_instruction);
     endWhile: ;
-  }
-  //writeToFile(fWrite,data->b_instruction);
-  
-  //fclose(fWrite);
+  }  
+  fclose(fWrite);
   fclose(fRead);
 }

@@ -5,7 +5,7 @@ start:  addi $1 $0 2
         muli  $5 $2 0xDEAD
         out $5
         subi  $6 $3 -10
-        lw $9 $10 data
+        lw $9 $10 44
         addi $11 $0 0x31
         out $11
         halt
