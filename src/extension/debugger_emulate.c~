@@ -301,7 +301,6 @@ char *getUserCommand(void) {
   LOOP.
   
   --------------------------------------------*/
-  
   return getUserCommand();
 }
 
