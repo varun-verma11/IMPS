@@ -10,6 +10,10 @@ reg -m <R1> <R2> ... <Rn>
 mem <M>
 mem -a
 mem -r <M1> <Mn>
+search -M <I> <M1> <M2>
+search -M -a <I>
+search -R <I> <R1> <R2>
+search -R -a <I>
 pc
 
 -----
@@ -45,7 +49,8 @@ reg -r:
 
   reg -r <R1> <Rn>
   
-  Displays the registers within the specified range and the data stored in them. 
+  Displays the registers within the specified range and the data stored in them.
+  The display is inclusive of the extreme bounds of the range. 
   eg. To display the contents of registers 0 to 7 enter the following command:
   
   reg -r $0 $7
@@ -76,13 +81,52 @@ mem -a:
 
   mem -a
   
-  Displays all memory locations and the data held in each of them.
+  Displays all memory locations and the data stored in each of them.
+  
+mem -r:
+
+  mem -r <M1> <Mn>
+  
+  Displays the memory locations within the specified range and the data stored 
+  in them. The display is inclusive of the extreme bounds of the range.
+  eg. To display the contents of memory locations 1 through 9 enter the
+  following command:
+  
+  mem -r 1 9
+  
+search -M:
+
+  search -M <I> <M1> <Mn>
+  
+  Retrieves all memory locations within the specified range between <M1> and
+  <Mn> inclusive that contain the specified integer <I>·
+
+search -M -a:
+  
+  search -M -a <I>
+
+  Retrieves all memory locations that contain the specified integer.
+
+search -R:
+
+  search -R <I> <R1> <Rn>
+  
+  Retrieves all registers within the specified range between <R1> and
+  <Rn> inclusive that contain the specified integer <I>·
+
+search -R -a:
+  
+  search -R -a <I>
+
+  Retrieves all registers that contain the specified integer.
+
+pc:
+
+  pc
+  
+  Displays the current value of the program counter.
   
 
-  
-  
-  
-  
   
   
   
