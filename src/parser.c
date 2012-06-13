@@ -1,4 +1,4 @@
-#include "assemble.h"
+#include "parser.h"
 
 /*
   This method returns the label in the given instruction.

@@ -1,6 +1,5 @@
-gr
 CC      = gcc
-CFLAGS  = -Wall
+CFLAGS  = -Wall -pedantic -std=c99
 
 .SUFFIXES: .c .o
 
@@ -8,19 +7,20 @@ CFLAGS  = -Wall
 
 all: assemble emulate
 
-parser.o: parser.c assemble.h
+parser.o: parser.c parser.h table.h
 
-table.o: table.c assemble.h
+checkOptype.o : checkOptype.c checkOptype.h
 
-tokeniser.o: tokeniser.c assemble.h
+tokeniser.o: tokeniser.c tokeniser.h
 
-checkOptype.o: checkOptype.c assemble.h
+table.o : table.c table.h
 
-assemble.o: assemble.c assemble.h  
+assemble.o: assemble.c assemble.h parser.h checkOptype.h tokeniser.h table.h
 
+emulate.o : emulate.c
 
-assemble: assemble.o checkOptype.o tokeniser.o table.o parser.o
-	$(CC) $(CFLAGS) -o $@ $^
+assemble: assemble.o parser.o checkOptype.o tokeniser.o table.o
+	$(CC)  $(CFLAGS) -o $@ $^
 
 emulate: emulate.o
 	$(CC) $(CFLAGS) -o $@ $^

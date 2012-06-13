@@ -291,7 +291,7 @@ char *getUserCommand(void) {
   printf("(jvg)");
   char *buff = malloc(BUFFER_SIZE);
   fgets(buff,BUFFER_SIZE,stdin);
-  if (checkUserCommandValid(buff)) return;
+  if (checkUserCommandValid(buff)) return buff;
   printf("(jvg) INVALID COMMAND: Please enter a valid command or type '--help' for help");
   
   /*--------------------------------------------
