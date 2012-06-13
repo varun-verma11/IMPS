@@ -12,9 +12,9 @@ parser.o: parser.c assemble.h
 
 table.o: table.c assemble.h
 
-tokeniser.o: tokeniser.c assemble.h
+tokeniser.o: tokeniser.c 
 
-checkOptype.o: checkOptype.c assemble.h
+checkOptype.o: checkOptype.c 
 
 assemble.o: assemble.c assemble.h  
 
