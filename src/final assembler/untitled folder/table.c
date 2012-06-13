@@ -11,23 +11,15 @@ void addToTable(char *key, int value, struct Table *table) {
 int getValue(char *key, struct Table *table) {
   struct Table_Elem *current = table->head;  
   while(current!=NULL) {
-    if (strncmp(key,current->key,sizeof(char) * strlen(current->key))==0) {
-      return current->value;
-    }
+    if (strcmp(key,current->key)==0) return current->value;
     current = current->next;
   }
-  free(current);
   return -1;
 }
 
-struct Table *initialiseEmptyTable(void) {
+struct Table *initialiseSymbolTable(void) {
   struct Table *table = (struct Table *) malloc(sizeof(struct Table));
   table->head = NULL;
-  return table;
-}
-
-struct Table *initialiseOpcodeTable(void) {
-  struct Table *table = initialiseEmptyTable();
   addToTable("halt",0,table);
   addToTable("add", 1,table);
   addToTable("addi",2,table);
@@ -49,3 +41,4 @@ struct Table *initialiseOpcodeTable(void) {
   addToTable("out",18,table);
   return table;
 }
+

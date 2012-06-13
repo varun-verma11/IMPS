@@ -1,3 +1,4 @@
+#include "assemble.h"
 /*
   This method reads a single line of assembly instruction from the file and put 
   it in the a_instruction element of the structure data from the given 
@@ -16,12 +17,18 @@ void readFromFile(FILE *fp, struct Data *data) {
   This method writes a binary instruction in the given file stream.
   @param fp   : specifies the file stream to which the binary instruction has to
                 writtten
-  @param data : specifies the structure data which contains the binary instruction which has to be written to the 
+  @param data : specifies the structure data which contains the binary 
+                instruction which has to be written to the file stream given
 */
 void writeToFile(FILE *fp, uint32_t ins) {
   fwrite(&ins,sizeof(uint32_t), 1, fp);
 }
 
+/*
+  This method prints a 32-bit int on the terminal in base 2 with space between 
+  each of the 8 bits of the 32-bit integer
+  @param x : specifies the int which has to be printed on the terminal
+*/
 void printBits(uint32_t x) {
   int i,j;
   uint32_t mask = 1<<31;
@@ -34,7 +41,19 @@ void printBits(uint32_t x) {
   }
 }
 
-uint32_t pass2(char *tokens[5], struct Table *table, uint32_t addr){
+/*
+  This method carries out the second pass on the assembly instruction returns 
+  the 32-bit representation of the assembly instruction whose tokens are given.
+  @param tokens : specifies the tokens of the assembly instruction starting with
+                  opcode at index 0
+  @param table  : specifies the structure table which is the symbol table being 
+                  used for the current assembly. The  table is used to store all
+                  the opcodes with their int values. Addresses of all labels are
+                  also stored in the table
+  @return       : returns the 32-bit representation for the instruction tokens 
+                  given
+*/
+uint32_t pass2(char *tokens[5], struct Table *table){
    if (strcmp(tokens[1],".fill")==0) {
       return atoi(tokens[2]);
     }
@@ -54,6 +73,9 @@ uint32_t pass2(char *tokens[5], struct Table *table, uint32_t addr){
     }
 }
 
+/*
+  
+*/
 void pass1(char *instruction, uint32_t addr, struct Table *table) {
   if (checkLabelExists(instruction)) {
     addToTable(getLabel(instruction),addr,table);
@@ -88,7 +110,6 @@ int main(int argc, char **argv) {
   } while(feof(fRead)==0);
 
   //end pass 1
-
   rewind(fRead);
   FILE *fWrite = fopen(writeFP,"w");
   int i = 0;
@@ -114,7 +135,7 @@ int main(int argc, char **argv) {
       i += atoi(tokens[2]);
       address = i*4;
     } else {
-      data->b_instruction = pass2(tokens,table,address);
+      data->b_instruction = pass2(tokens,table);
       printBits(data->b_instruction);
       printf("\t%s", data->a_instruction);    
       address += 4;

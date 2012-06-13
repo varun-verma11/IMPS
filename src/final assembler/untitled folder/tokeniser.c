@@ -1,5 +1,4 @@
 #include "assemble.h"
-
 int checkLabelExists(char *instruction) {
   return strchr(instruction,58)!=NULL ;
 }
@@ -35,4 +34,10 @@ void tokeniser(char *instruction, char *tokens[5]) {
   } else {
     tokeniserWithoutLabel(inscpy,tokens);
   }
+}
+
+char *getLabel(char *instruction) {
+  char *inscpy = (char *) malloc(sizeof(instruction));
+  inscpy =strcpy(inscpy,instruction);
+  return strtok(inscpy,":");
 }

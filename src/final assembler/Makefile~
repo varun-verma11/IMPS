@@ -1,0 +1,31 @@
+gr
+CC      = gcc
+CFLAGS  = -Wall
+
+.SUFFIXES: .c .o
+
+.PHONY: all clean
+
+all: assemble emulate
+
+parser.o: parser.c assemble.h
+
+table.o: table.c assemble.h
+
+tokeniser.o: tokeniser.c assemble.h
+
+checkOptype.o: checkOptype.c assemble.h
+
+assemble.o: assemble.c assemble.h  
+
+
+assemble: assemble.o checkOptype.o tokeniser.o table.o parser.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+emulate: emulate.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+clean:
+	rm -f *.o
+	rm -f assemble
+	rm -f emulate

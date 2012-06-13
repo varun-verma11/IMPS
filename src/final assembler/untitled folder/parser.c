@@ -1,11 +1,5 @@
 #include "assemble.h"
 
-char *getLabel(char *instruction) {
-  char *inscpy = (char *) malloc(sizeof(instruction));
-  inscpy =strcpy(inscpy,instruction);
-  return strtok(inscpy,":");
-}
-
 int checkHex(char *reg){
   char *hex = "0x";
   char *regs = (char *) malloc(sizeof(char) *3);
@@ -47,29 +41,30 @@ uint32_t parser_r(char **tokens, struct Table *table){
 	return (opcode + reg1Opcode + reg2Opcode + reg3Opcode);
 }
 
-uint32_t parser_i(char **tokens,struct Table *labelTable, struct Table *opcodeTable, uint32_t addr){
-  uint32_t opcode = getValue(tokens[0],opcodeTable);
+uint32_t parser_i(char **tokens,struct Table *table){
+  uint32_t opcode = getValue(tokens[0],table)<<26;
   uint32_t immediateValue;
   uint32_t reg1Opcode = getRegisterNumber(tokens[1])<<21;
   uint32_t reg2Opcode = getRegisterNumber(tokens[2])<<16;
+
   if(checkHex(tokens[3])){
-    immediateValue = strtol(tokens[3],NULL,16);
+    immediateValue = (int) strtol(tokens[3],NULL,16);
   } else if(checkLabel(tokens[3])) {
-    immediateValue = getValue(tokens[3],labelTable);    
-    if (opcode>=9 && opcode<=15) immediateValue = (immediateValue-addr)/4 ;
+    immediateValue = (int) getValue(tokens[3], table);
   }else{
     immediateValue = atoi(tokens[3]);
   }
-  return ((opcode<<26) + reg1Opcode + reg2Opcode + immediateValue);
+  return (opcode + reg1Opcode + reg2Opcode + immediateValue);
 }
 
-uint32_t parser_j(char **tokens, struct Table *labelTable, struct Table *opcodeTable){
+uint32_t parser_j(char **tokens, struct Table *table){
   uint32_t address;
-  uint32_t opcode = getValue(tokens[0],opcodeTable)<<26;
+  uint32_t opcode = getValue(tokens[0],table)<<26;
   if(checkLabel(tokens[1])){
-    address = getValue(tokens[1],labelTable);
+    address = getValue(tokens[1],table);
   } else {
-    address = strtol(tokens[1],NULL,16);
+    address = *tokens[1];
   }
   return address+opcode;
 }
+

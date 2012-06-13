@@ -9,7 +9,7 @@
 
 struct Data {
   char *a_instruction;
-  uint32_t b_instruction[65536];
+  uint32_t b_instruction;
   int number_of_instructions;
 };
 
@@ -25,4 +25,3 @@ struct Table_Elem {
 struct Table {
   struct Table_Elem *head;
 };
-
