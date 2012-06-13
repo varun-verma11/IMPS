@@ -1,5 +1,4 @@
 #include "assemble.h"
-
 /*
   This method reads a single line of assembly instruction from the file and put 
   it in the a_instruction element of the structure data from the given 
@@ -15,11 +14,13 @@ void readFromFile(FILE *fp, struct Data *data) {
 }
 
 /*
-  This method writes a binary instruction in the given file stream.
-  @param fp   : specifies the file stream to which the binary instruction has to
-                writtten
-  @param data : specifies the structure data which contains the binary 
-                instruction which has to be written to the file stream given
+  This method writes the binary instrutions from teh array to the file specified
+  by the filepath.
+  @param filepath : specifies the file path to which the binary instructions
+                    has to writtten
+  @param data     : specifies the structure data which contains the binary 
+                    instructions which has to be written to the file stream 
+                    given
 */
 void writeToFile(char *filepath, struct Data *data) {
   FILE *fp;
@@ -51,14 +52,15 @@ void printBits(uint32_t x) {
 /*
   This method carries out the second pass on the assembly instruction returns 
   the 32-bit representation of the assembly instruction whose tokens are given.
-  @param tokens : specifies the tokens of the assembly instruction starting with
-                  opcode at index 0
-  @param table  : specifies the structure table which is the symbol table being 
-                  used for the current assembly. The  table is used to store all
-                  the opcodes with their int values. Addresses of all labels are
-                  also stored in the table
-  @return       : returns the 32-bit representation for the instruction tokens 
-                  given
+  @param tokens       : specifies the tokens of the assembly instruction 
+                        starting with opcode at index 0
+  @param opcodeTable  : specifies the structure table which is the symbol table 
+                        being used for the current assembly. The  table is used 
+                        to store all the opcodes with their int values. 
+  @param labelTable   : specifies a table structure which stores all the values
+                        for the labels whicc are used in the assembly code
+  @return             : returns the 32-bit representation for the instruction 
+                        tokens given
 */
 uint32_t pass2(char *tokens[5], struct Table *labelTable, struct Table *opcodeTable, uint32_t addr){
    if (strcmp(tokens[1],".fill")==0) {
@@ -81,7 +83,13 @@ uint32_t pass2(char *tokens[5], struct Table *labelTable, struct Table *opcodeTa
 }
 
 /*
-  
+  This method carries out the first pass on the given instruction. If any labels
+  are in the instructions then they are added to the table given which contains
+  all the labels and their address values.
+  @param instruction : specifies the instruction which currently being assembled
+  @param addr        : specifies the address of current instruction
+  @param table       : specifies the table which contains the address values for
+                       the labels 
 */
 void pass1(char *instruction, uint32_t addr, struct Table *table) {
   if (checkLabelExists(instruction)) {
@@ -89,6 +97,16 @@ void pass1(char *instruction, uint32_t addr, struct Table *table) {
   }
 }
 
+/*
+  This is the main method which is invoked to assemble an IMPS assembly file. 
+  This method carries sets up the tables and then carries out the two pass 
+  assembly and then writes the 32-bit binary representations of the instructions
+  into the file specified.
+  @param argc : specifies the number of arguments providied to the program at 
+                run time
+  @param argv : specifes the arguments provided to the program to the run time
+  @return     : returns 1 when the program suceeds without a failure.
+*/
 int main(int argc, char **argv) {
   assert("Wrong Number of arguments" && argc==3);
   struct Data *data = malloc(sizeof(struct Data));
@@ -119,7 +137,6 @@ int main(int argc, char **argv) {
     free(data->a_instruction);
   } while(feof(fRead)==0);
 
-  //end pass 1
   rewind(fRead);
   int i = 0;
   address = 0;

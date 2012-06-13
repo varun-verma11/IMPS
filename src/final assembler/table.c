@@ -1,5 +1,12 @@
 #include "assemble.h"
 
+/*
+  This method adds the given key and value to the ADT table which is specifed
+  @param key   : specifies the key to be added to the table
+  @param value : specifies the value to be added to the table
+  @param table : specifies the table in which the given key and values have to 
+                 be added
+*/
 void addToTable(char *key, int value, struct Table *table) {
   struct Table_Elem *new_elem = (struct Table_Elem *) malloc(sizeof(struct Table_Elem));
 	new_elem->key = key;
@@ -8,6 +15,14 @@ void addToTable(char *key, int value, struct Table *table) {
   table->head = new_elem;
 }
 
+/*
+  This method returns the value for the given key in the given table.
+  @param key   : specifies the key whose value has to be returned
+  @param table : specifes the table from which the value of the given table has
+                 to be returned
+  @return      : this method retunrs the value for the given key in the table 
+                 given
+*/
 int getValue(char *key, struct Table *table) {
   struct Table_Elem *current = table->head;  
   while(current!=NULL) {
@@ -20,12 +35,21 @@ int getValue(char *key, struct Table *table) {
   return -1;
 }
 
+/*
+  This method initialies an empty table
+  @return : the method returns a pointer for an empty table.  
+*/
 struct Table *initialiseEmptyTable(void) {
   struct Table *table = (struct Table *) malloc(sizeof(struct Table));
   table->head = NULL;
   return table;
 }
 
+/*
+  This method initialises a table which contains the value for all the opcodes
+  in an IMPS machine.
+  @returns : returns a pointer to the initialised table  
+*/
 struct Table *initialiseOpcodeTable(void) {
   struct Table *table = initialiseEmptyTable();
   addToTable("halt",0,table);

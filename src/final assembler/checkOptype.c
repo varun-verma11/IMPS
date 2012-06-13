@@ -1,5 +1,11 @@
 #include "assemble.h"
 
+/*
+  This method determines the type of the instruction,like r, i or j for a given 
+  IMPS opcode  
+  @param opcode : specifies the opcode for the current instruction.
+  @return       : return a char which specifies teh type of the given opcode.
+*/
 char getOptype(char *opcode) {
   if (strcmp("halt", opcode)==0) {
     return '-';
