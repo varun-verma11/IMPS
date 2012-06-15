@@ -22,20 +22,7 @@ struct Processor {
 };
 
 void binaryFileLoader(char *filepath, struct Processor *processor);
-uint8_t getOpcode(uint32_t instruction);
-uint32_t getAddress(uint32_t instruction);
-uint8_t getR1(uint32_t instruction);
-uint8_t getR2(uint32_t instruction);
-uint8_t getR3(uint32_t instruction);
-int16_t getImmediateValue(uint32_t instruction);
-void setMemory(struct Processor *proc, uint32_t address, int32_t value);
-uint32_t getMemory(struct Processor *proc, uint32_t address);
-uint32_t getInstructionAtPC(struct Processor *proc);
-int32_t getRegisterValue(struct Processor *proc, int8_t reg);
 void dumpProcessor(struct Processor *proc);
-
-
-
 
 
 #endif
