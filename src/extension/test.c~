@@ -1,0 +1,19 @@
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+int checkIfNumber(char *num) {
+  char *temp = num;
+  while(*temp) {
+    if (!isdigit(*temp)) return 0;
+    temp++;
+  }
+  return 1;
+}
+
+int main(void) {
+  char *num = malloc(3);
+  num = "43-";
+  printf("43 is %i \n", checkIfNumber(num));
+  return 1;
+}

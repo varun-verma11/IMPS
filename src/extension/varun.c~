@@ -68,7 +68,14 @@ void searchMemory(struct Processor *proc, char **tokens) {
   int end = MEMORY_SIZE;
   int value = atoi(tokens[1]);
   if (strcmp(tokens[0],"r")==0) {
-    
+    if (!checkRegister(token[2]) {
+      printInvalidCommandMessage();
+      return;
+    }
+    if (!checkRegister(token[3]) {
+      printInvalidCommandMessage();
+      return;
+    }
     start = getRegisterNumber(token[2]);
     end = getRegisterNumber(tokens[3]);
   } else if (strcmp(tokens[0],"a")!=0) {
