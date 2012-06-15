@@ -1,0 +1,20 @@
+CC      = gcc
+CFLAGS  = -Wall -pedantic -std=c99
+
+.SUFFIXES: .c .o
+
+.PHONY: all clean
+
+all: emulate
+
+emulate(with_added_instructions.h.o: emulate(with_added_instructions).c emulate(with_added_instructions).h
+
+emulate(with_added_instructions)_getting_registers.o : emulate(with_added_instructions)_getting_registers.c emulate(with_added_instructions).h
+
+emulate: emulate(with_added_instructions)_getting_registers.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+clean:
+	rm -f *.o
+	rm -f assemble
+	rm -f emulate
