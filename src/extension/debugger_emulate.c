@@ -90,18 +90,12 @@ void printPC( struct Processor *proc) {
 void printMemory(struct Processor *proc, char **tokens) {
   if (strcmp("-r",tokens[0])==0) {
     int end = getRegisterNumber(tokens[2]);
-    for (int i=0; i<end/4 ; i++) {
-      for (int j=0;j<4 ; j++) {
-        printf("%s = %i \t",tokens[(i*j) + j],getRegisterValue(proc,getRegisterNumber(tokens[(i*j) + j])));
-      }
-      printf("      \n");
+    for (int i=start; i<end ; i++) {
+      printf("%s = %i \t",tokens[(i*j) + j],getRegisterValue(proc,getRegisterNumber(tokens[(i*j) + j])));    
     }
   } else if (strcmp("-a",tokens[0])==0) {
     for (int i=0; i<MEMORY_SIZE/4 ; i++) {
-      for (int j=0;j<4 ; j++) {
-        printf("%s = %i \t",(i*j)+j,getRegisterValue(proc,getRegisterNumber((i*j) + j)));
-      }
-      printf("      \n");
+      printf("%s = %i \t",(i*j)+j,getRegisterValue(proc,getRegisterNumber((i*j) + j)));
     }
   } else {
     int i =0;

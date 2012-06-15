@@ -1,31 +1,5 @@
 #include "emulate.h"
-
-/*
-#define MIN(a, b) (a > b ? b : a)
-
-#define MEMORY_SIZE 65536
-#define NUMBER_OF_REGISTERS 32
-*/
-/*
-  The enumeration opCodes stores all the opcodes which a user can have in the 
-  file
-*/
-/*
-enum opCodes {HALT, ADD, ADDI, SUB,SUBI,MUL,MULI,LW,SW,BEQ, BNE, BLT, BGT, BLE, 
-                BGE, JMP, JR, JAL, OUT, DIV, DIVI, MOD, MODI, FACT, FACTI,SWAP};
-*/
-/*
-  The structure processor stores the state of the processor. pc is used to store
-  the value of program counter; gpr are the 32-bit general purpose registers;
-  and the array memory represents the memory of the memory size specified.
-*/
-/*
-struct Processor {
-  uint32_t pc;
-  int32_t gpr[NUMBER_OF_REGISTERS];
-  uint8_t memory[MEMORY_SIZE]; 
-};
-*/
+#include "carryOutInstruction.h"
 
 /*
   The method binaryFileLoader loads the binary file in the memory of the given
@@ -53,54 +27,6 @@ void binaryFileLoader(char *filepath, struct Processor *processor) {
 
   fread(processor->memory, sizeof(uint32_t), fileSize, fp);
   fclose(fp);
-}
-
-
-
-/*
-  This method sets the value of the memory at the specified addredd to the value
-  given.
-  @param proc    : specifies the processor
-  @param address : specifies the address of memory which needs the value to be
-                   set to the given value
-  @param value   : specifies the new value for the memory to be set
-*/
-void setMemory(struct Processor *proc, uint32_t address, int32_t value) {
-  *(uint32_t *)(proc->memory + address) = value;
-}
-
-/*
-  This method returns the data stored at in the memory of the specifed processor
-  at the specified address.
-  @param proc    : specifies the processor 
-  @param address : specifies the address of the memory which data has to be
-                   fetched
-  @return        : returns the value stored in the memory at the specified
-                   address
-*/
-uint32_t getMemory(struct Processor *proc, uint32_t address) {
-  return *(uint32_t *)(proc->memory + address);
-}
-
-/*
-  This method returns the instruction stored in the memory at address specified
-  by the program counter of the processor.
-  @param proc : specifies the processor which contains the program counter,
-                memory, and registers
-*/
-uint32_t getInstructionAtPC(struct Processor *proc){
-  return *(uint32_t *)(proc->memory + proc->pc);
-}
-
-/*
-  This method returns the value stored in the specified register
-  @param reg  : specifies the register index whose value has to be returned
-  @param proc : specifies the processor from which the value of register has to
-                be returned
-  @return     : returns the value of the register specifed by the index given
-*/
-int32_t getRegisterValue(struct Processor *proc, int8_t reg){
-  return proc->gpr[reg];
 }
 
 /*

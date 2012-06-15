@@ -5,15 +5,30 @@ CFLAGS  = -Wall -pedantic -std=c99
 
 .PHONY: all clean
 
-all: emulate
+all: assemble emulate
 
-emulate_getting_registers.o: emulate_getting_registers.c emulate.h
+parser.o: parser.c parser.h table.h
 
-emulate.o : emulate.c emulate_getting_registers.c emulate.h
+checkOptype.o : checkOptype.c checkOptype.h
 
-emulate: emulate.o emulate_getting_registers.o
+tokeniser.o: tokeniser.c tokeniser.h
+
+table.o : table.c table.h
+
+assemble.o: assemble.c assemble.h parser.h checkOptype.h tokeniser.h table.h
+
+emulate.o : emulate.c
+
+carryOutInstruction.o: carryOutInstruction.c carryOutInstruction.h
+
+emulate.o : emulate.c carryOutInstruction.h emulate.h
+
+emulate: emulate.o carryOutInstruction.o
 	$(CC) $(CFLAGS) -o $@ $^
 
+assemble: assemble.o parser.o checkOptype.o tokeniser.o table.o
+	$(CC)  $(CFLAGS) -o $@ $^
+	
 clean:
 	rm -f *.o
 	rm -f assemble

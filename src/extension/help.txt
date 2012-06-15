@@ -1,7 +1,7 @@
 Below is a list of available commands in the C-ker debugger. A description of
 the function and usage of each command follows.
 
-cur
+list
 stp
 reg <R>
 reg -a
@@ -16,11 +16,11 @@ search -R <I> <R1> <R2>
 search -R -a <I>
 pc
 
------
+--------------------------------------------------------------------------------
 
-cur:
+list:
   
-  cur
+  list
   
   Displays the current line of code that the debugger points to.
 
@@ -96,7 +96,7 @@ mem -r:
   
 search -M:
 
-  search -M <I> <M1> <Mn>
+  search -M -r <I> <M1> <Mn>
   
   Retrieves all memory locations within the specified range between <M1> and
   <Mn> inclusive that contain the specified integer <I>·
@@ -109,7 +109,7 @@ search -M -a:
 
 search -R:
 
-  search -R <I> <R1> <Rn>
+  search -R -r <I> <R1> <Rn>
   
   Retrieves all registers within the specified range between <R1> and
   <Rn> inclusive that contain the specified integer <I>·
@@ -126,15 +126,4 @@ pc:
   
   Displays the current value of the program counter.
   
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
-  
+--------------------------------------------------------------------------------
