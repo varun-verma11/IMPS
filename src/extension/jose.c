@@ -35,16 +35,20 @@ void printLine(char *filepath, int n){
 void printReg(struct Processor *proc , char **tokens) {
   int start = 0 ;
   int end = NUMBER_OF_REGISTERS;
-  if(!checkRegCommandIsValid(tokens+1)){
-    printInvalidCommandMessage();
-    return;
-  }
   if (strcmp("-r",tokens[0])==0) {
     start = getRegisterNumber(tokens[1]);
     end   = getRegisterNumber(tokens[2]);
+    if(!start<end && !checkAllRegistersAreValid(tokens+1)){
+      printInvalidCommandMessage();
+      return;
+    }
   }
   else if (strcmp("-m",tokens[0])==0) {
     tokens++;
+    if(!checkAllRegistersAreValid(tokens)){
+      printInvalidCommandMessage();
+      return;
+    }
     int i =0;
     int j=0;
     while(tokens[i]!=NULL) {
