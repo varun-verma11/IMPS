@@ -5,7 +5,7 @@ CFLAGS  = -Wall -pedantic -std=c99
 
 .PHONY: all clean
 
-all: assemble emulate
+all: assemble emulate extension
 
 parser.o: parser.c parser.h table.h
 
@@ -23,6 +23,13 @@ carryOutInstruction.o: carryOutInstruction.c carryOutInstruction.h
 
 emulate.o : emulate.c carryOutInstruction.h emulate.h
 
+debugger.o : debugger.c carryOutInstruction.h userCommands.h debugger.h
+
+userCommands.o : userCommands.c userCommands.h carryOutInstruction.h parser.h emulate.h
+
+extension : debugger.o carryOutInstruction.o userCommands.o
+	$(CC) $(CFLAGS) -o $@ $^
+
 emulate: emulate.o carryOutInstruction.o
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -33,3 +40,4 @@ clean:
 	rm -f *.o
 	rm -f assemble
 	rm -f emulate
+	rm -f extension

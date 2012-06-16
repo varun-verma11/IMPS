@@ -1,5 +1,5 @@
-#include "emulate.h"
 #include "carryOutInstruction.h"
+#include "emulate.h"
 
 /*
   The method binaryFileLoader loads the binary file in the memory of the given
