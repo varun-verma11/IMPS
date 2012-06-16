@@ -12,13 +12,13 @@ int checkIfNumber(char *num) {
 }
 
 int checkAllRegistersAreValid(char **regs) {
-  while (*reg) {
-    if (!checkRegister(*reg) || !checkIfNumber(*reg+1) || 
-              getRegisterNumber(reg) <0 || 
-              getRegisterNumber(reg) >= NUMBER_OF_REGISTERS) {
+  while (*regs) {
+    if (!checkRegister(*regs) || !checkIfNumber(*regs+1) || 
+              getRegisterNumber(*regs) <0 || 
+              getRegisterNumber(*regs) >= NUMBER_OF_REGISTERS) {
       return 0;
     }
-    reg++;
+    regs++;
   }
   return 1;
 }
