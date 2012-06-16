@@ -701,8 +701,10 @@ int main(int argc, char **argv) {
   char **tokens = malloc(sizeof(char) *BUFFER_SIZE);
     
   do {
-    tokens = getUserCommand();    
+    tokens = getUserCommand();
+    
     executeUserCommand(argv[2] , argv[1], processor, tokens);
+    lineNumber++;
     printf("token -> %s\n",tokens[0]); 
   }while (strcmp(tokens[0],"q")==0);
   
