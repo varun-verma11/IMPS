@@ -12,13 +12,13 @@ int checkIfNumber(char *num) {
 }
 
 int checkAllRegistersAreValid(char **regs) {
-  while (*reg) {
-    if (!checkRegister(*reg) || !checkIfNumber(*reg+1) || 
-              getRegisterNumber(reg) <0 || 
-              getRegisterNumber(reg) >= NUMBER_OF_REGISTERS) {
+  while (*regs) {
+    if (!checkRegister(*regs) || !checkIfNumber(*regs+1) || 
+              getRegisterNumber(*regs) <0 || 
+              getRegisterNumber(*regs) >= NUMBER_OF_REGISTERS) {
       return 0;
     }
-    reg++;
+    regs++;
   }
   return 1;
 }
@@ -115,7 +115,21 @@ void printMemory(struct Processor *proc, char **tokens) {
   
 }
 
-
+char **tokeniseUserCommand(char *command) {
+  char *buff = malloc(sizeof(char) * BUFFER_SIZE);
+  buff = strncpy(buff,command,sizeof(char) *BUFFER_SIZE);
+  char **tokens = malloc(sizeof(char) *BUFFER_SIZE);
+  char *token = malloc(50);
+  int i=0;
+  token = strtok(buff," ");
+  tokens[i] = token;
+  while(token!=0) {
+    i++;
+    token = strtok(NULL," ");
+    tokens[i] = token;
+  }  
+  return tokens;
+}
 
 void searchMemory(struct Processor *proc, char **tokens) {
   int start =0;
