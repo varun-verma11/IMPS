@@ -3,6 +3,7 @@ the function and usage of each command follows.
 
 list
 stp
+reg <R>
 reg -a
 reg -r <R1> <Rn>
 reg -m <R1> <R2> ... <Rn>
