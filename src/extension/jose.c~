@@ -34,7 +34,7 @@ void printLine(char *filepath, int n){
 
 int main(void){
   char *fp = malloc(BUFFER_SIZE);
-  fp = "emulate.c";
+  fp = "assemble.c";
   printLine(fp,2000);
   return 0;
 }
