@@ -1,11 +1,49 @@
+#include "jose.h"
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
+#define NUMBER_OF_REGISTERS 32
+#define MEMORY_SIZE 65536
 
-#define BUFFER_SIZE 300
+struct Processor {
+  uint32_t pc;
+  int32_t gpr[NUMBER_OF_REGISTERS];
+  uint8_t memory[MEMORY_SIZE]; 
+};	 
+int checkRegister(char *token){
+ return (token!=NULL) ? (token[0]=='$') : 0;
+}
+int getRegisterNumber(char *reg){
+  return atoi(reg+1);
+}
+int checkIfNumber(char *num) {
+  char *temp = num;
+  while(*temp) {
+    if (!isdigit(*temp)) return 0;
+    temp++;
+  }
+  return 1;
+}
+
+int checkAllRegistersAreValid(char **regs) {
+  while (*regs) {
+    if (!checkRegister(*regs) || !checkIfNumber(*regs+1) || 
+              getRegisterNumber(regs) <0 || 
+              getRegisterNumber(regs) >= NUMBER_OF_REGISTERS) {
+      return 0;
+    }
+    regs++;
+  }
+  return 1;
+}
+
+void printInvalidCommandMessage(void) {
+  printf("(JVG) invalid command. Please enter --help for help\n (JVG)");
+}
+
+
+
+
+
+
 void printLine(char *filepath, int n){
   FILE *fp;
   fp = fopen(filepath,"r");
@@ -76,9 +114,9 @@ void printReg(struct Processor *proc , char **tokens) {
 
 
 int main(void){
-  char *fp = malloc(BUFFER_SIZE);
-  fp = "assemble.c";
-  printLine(fp,2000);
-  return 0;
+
+
+
+return 0
 }
 
