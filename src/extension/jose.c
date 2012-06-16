@@ -41,6 +41,36 @@ void printInvalidCommandMessage(void) {
 
 
 
+void printLine(char *filepath, int n){
+  /*
+  basically this doesnt has any checks for empty lines...inlude that check and check if its an empty line and dont use a variable iin this..use n the param given in and decrement it everytime if u dont read an empty line. and then only print it on the screen coz ryt now its prtinting empty line and also keep the print format as it is..only the loop should be changed not the print statement.
+  
+  */
+  FILE *fp;
+  fp = fopen(filepath,"r");
+  char *buffer = (char *) malloc(BUFFER_SIZE * sizeof(char));
+  if (fp==NULL) {
+    perror("ERROR in opening file");
+    exit(EXIT_FAILURE);
+  }
+  while (!feof(fp) &&0<n ){
+    memset(buffer, 0, ((sizeof(char))*BUFFER_SIZE));
+    fgets (buffer, BUFFER_SIZE, fp); 
+    if(strlen(buffer)>1) n--;
+    //printf("%s------n=%i----length =%i\n", buffer,n,strlen(buffer));
+    
+  }
+  if(n==0) {
+    printf("%s", buffer);
+  }
+  else{
+    perror("End of file reached before line");
+  }                  
+  free(buffer);
+  fclose(fp);
+
+}
+/*
 
 
 
@@ -69,7 +99,7 @@ void printLine(char *filepath, int n){
   fclose(fp);
 
 }
-
+*/
 void printReg(struct Processor *proc , char **tokens) {
   int start = 0 ;
   int end = NUMBER_OF_REGISTERS;
