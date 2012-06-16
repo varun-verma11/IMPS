@@ -80,14 +80,14 @@ void printLine(char *filepath, int n){
     exit(EXIT_FAILURE);
   }
   int i=1;
-  do {
+  while (!feof(fp) &&i<n ){
     i++; 
     memset(buffer, 0, ((sizeof(char))*BUFFER_SIZE));
     fgets (buffer, BUFFER_SIZE, fp); 
   
-  }while (!feof(fp) &&i<n );
+  }
   if(i==n) {
-    printf("%s\n", buffer);
+    printf("%s", buffer);
   }
   else{
     perror("End of file reached before line");

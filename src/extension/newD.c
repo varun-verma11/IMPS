@@ -72,6 +72,10 @@ int checkAllRegistersAreValid(char **regs) {
 }
 
 void printLine(char *filepath, int n){
+  /*
+  basically this doesnt has any checks for empty lines...inlude that check and check if its an empty line and dont use a variable iin this..use n the param given in and decrement it everytime if u dont read an empty line. and then only print it on the screen coz ryt now its prtinting empty line and also keep the print format as it is..only the loop should be changed not the print statement.
+  
+  */
   FILE *fp;
   fp = fopen(filepath,"r");
   char *buffer = (char *) malloc(BUFFER_SIZE * sizeof(char));
