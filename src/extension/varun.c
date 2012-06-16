@@ -33,27 +33,28 @@ void searchRegister(struct Processor *proc, char **tokens) {
     return;
   }
   int value = atoi(tokens[1]);
+  
+  if (!checkAllRegistersAreValid(tokens+1)) {
+    printInvalidCommandMessage();
+    return;
+  }
+  
   if (strcmp(tokens[0],"-r")==0) {
-    if (!checkRegister(token[2] || !checkRegister(token[3] || 
-              !checkIfNumber(token[2]+1) || !checkIfNumber(tokens[3]+1)) {
+    start = getRegisterNumber(token[2]);
+    end = getRegisterNumber(tokens[3]);
+    if (start<0 || start>end || end>=NUMBER_OF_REGISTERS) {
       printInvalidCommandMessage();
       return;
     }
-    start = getRegisterNumber(token[2]);
-    end = getRegisterNumber(tokens[3]);
-    if (start<0 || start>end || end>32) {
-      printInvalidCommandMessage();
-      return;
+    if (tokens[4]!=NULL) {
+       printInvalidCommandMessage();
+       return;
     }
   } else if (strcmp(tokens[0],"-a")!=0) {
     printInvalidCommandMessage();
     return;
   }
   
-  if (!checkAllRegistersAreValid(tokens+1)) {
-    printInvalidCommandMessage();
-    return;
-  }
   printf("\n(JVG)");
   for (int i = start; i<end ; i++) {
     if (proc->gpr[i]==value) {
@@ -61,30 +62,72 @@ void searchRegister(struct Processor *proc, char **tokens) {
     }
   }
   printf("\n(JVG)");
+}
+
+int checkIfAllValidNumbers(char **tokens) {
+  while(*tokens) {
+    if (!checkIfNumber(*tokens)) return 0;
+    tokens++;
+  }
+  return 1;
+}
+
+void printMemory(struct Processor *proc, char **tokens) {
+  int start = 0;
+  int end = MEMORY_SIZE;
+  if (checkIfAllValidNumbers(tokens+1)) {
+    printInvalidCommandMessage();
+    return;
+  }
+  if (strcmp(tokens[0],"-r")) {
+    start = atoi(tokens[1]);
+    end = atoi(tokens[2]);
+    if (start<0 || start>end || end>=MEMORY_SIZE) {
+      printInvalidCommandMessage();
+      return;
+    }
+    if (tokens[4]!=NULL) {
+       printInvalidCommandMessage();
+       return;
+    }
+  } else if (strcmp(tokens[0],"-m")) {
+    while (*tokens) {
+    
+    }
+  }
 }
 
 void searchMemory(struct Processor *proc, char **tokens) {
   int start =0;
   int end = MEMORY_SIZE;
-  int value = atoi(tokens[1]);
-  if (strcmp(tokens[0],"r")==0) {
-    
-    start = getRegisterNumber(token[2]);
-    end = getRegisterNumber(tokens[3]);
-  } else if (strcmp(tokens[0],"a")!=0) {
+  if (!checkIfAllValidNumbers(tokens+1)) {
     printInvalidCommandMessage();
     return;
   }
-  
+  int value = atoi(tokens[1]);
+  if (strcmp(tokens[0],"-r")==0) {
+    start = getRegisterNumber(token[2]);
+    end = getRegisterNumber(tokens[3]);
+    if (start<0 || start>end || end>=MEMORY_SIZE) {
+      printInvalidCommandMessage();
+      return;
+    }
+    if (tokens[4]!=NULL) {
+       printInvalidCommandMessage();
+       return;
+    }
+  } else if (strcmp(tokens[0],"-a")!=0) {
+    printInvalidCommandMessage();
+    return;
+  }  
   printf("\n(JVG)");
   for (int i = start; i<end ; i++) {
     if (proc->gpr[i]==value) {
-      printf("$%i=%i  ",i,getRegisterValue(getRegisterNumber));
+      printf("M%i=%i  ",i,getRegisterValue(getRegisterNumber));
     }
   }
   printf("\n(JVG)");
 }
-
 
 void search(struct Processor *proc,char **tokens) {
   if (strcmp(token[0],"-M") ==0) {
