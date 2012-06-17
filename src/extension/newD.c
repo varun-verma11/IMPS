@@ -23,6 +23,8 @@ struct Processor {
   uint8_t memory[MEMORY_SIZE]; 
 };
 
+//this is a global constant to store the state of the program, i.e. value 1 if program ran.
+int programExitValue;
 
 /*
   This method checks if the given tokenn is a register or not.
@@ -71,35 +73,6 @@ int checkAllRegistersAreValid(char **regs) {
   return 1;
 }
 
-void printLine(char *filepath, int n){
-  /*
-  basically this doesnt has any checks for empty lines...inlude that check and check if its an empty line and dont use a variable iin this..use n the param given in and decrement it everytime if u dont read an empty line. and then only print it on the screen coz ryt now its prtinting empty line and also keep the print format as it is..only the loop should be changed not the print statement.
-  
-  */
-  FILE *fp;
-  fp = fopen(filepath,"r");
-  char *buffer = (char *) malloc(BUFFER_SIZE * sizeof(char));
-  if (fp==NULL) {
-    perror("ERROR in opening file");
-    exit(EXIT_FAILURE);
-  }
-  int i=1;
-  while (!feof(fp) &&i<n ){
-    i++; 
-    memset(buffer, 0, ((sizeof(char))*BUFFER_SIZE));
-    fgets (buffer, BUFFER_SIZE, fp); 
-  
-  }
-  if(i==n) {
-    printf("%s", buffer);
-  }
-  else{
-    perror("End of file reached before line");
-  }                  
-  free(buffer);
-  fclose(fp);
-
-}
 /*
   This method returns the value stored in the specified register
   @param reg  : specifies the register index whose value has to be returned
@@ -110,7 +83,6 @@ void printLine(char *filepath, int n){
 int32_t getRegisterValue(struct Processor *proc, int8_t reg){
   return proc->gpr[reg];
 }
-
 
 void printReg(struct Processor *proc , char **tokens) {
   int start = 0 ;
@@ -311,7 +283,7 @@ void search(struct Processor *proc,char **tokens) {
 
 
 void printPC( struct Processor *proc) {
-  printf("PC = %x \n",proc->pc);
+  printf("PC = %i \n",proc->pc);
 }
 
 
@@ -410,15 +382,12 @@ uint32_t getInstructionAtPC(struct Processor *proc){
   return *(uint32_t *)(proc->memory + proc->pc);
 }
 
-
-
 int carryOutInstruction(struct Processor *processor) {
   uint32_t instruction = getInstructionAtPC(processor);
   uint8_t opcode = getOpcode(instruction);
   uint32_t backupPC = processor->pc;
   int32_t temp;
   div_t division;
-
   switch (opcode)  {
     case HALT : return 0;
     case ADD  : processor->gpr[getR1(instruction)] = 
@@ -549,16 +518,23 @@ int carryOutInstruction(struct Processor *processor) {
                   
       default   : printf("invalid opcode\n");
                   break;
+                  return 0;
     }
     
     if(processor->pc == backupPC)  processor->pc += sizeof(uint32_t);
     return 1;
 }
 
-
 void step(struct Processor *proc) {
-  carryOutInstruction(proc);
-  printf("(JVG) ");
+  if (programExitValue==1) {
+    printf("No programs running currently. The previous program has exited already so step cannot be executed\n");
+    return;
+  }
+  int retVal = carryOutInstruction(proc);
+  if (retVal==0) {
+    programExitValue= 1;
+    printf("Program exited normally.\n");
+  }
 }
 
 
@@ -591,8 +567,29 @@ void binaryFileLoader(char *filepath, struct Processor *processor) {
   fclose(fp);
 }
 
-void listInstruction(char *instruction) {
-  printf("(JVG) %s \n (JVG)",instruction);
+void listInstruction(char *filepath, int n) {
+  FILE *fp;
+  fp = fopen(filepath,"r");
+  char *buffer = (char *) malloc(BUFFER_SIZE * sizeof(char));
+  if (fp==NULL) {
+    perror("ERROR in opening file");
+    exit(EXIT_FAILURE);
+  }
+  while (!feof(fp) &&0<n ){
+    memset(buffer, 0, ((sizeof(char))*BUFFER_SIZE));
+    fgets (buffer, BUFFER_SIZE, fp); 
+    if(strlen(buffer)>1) n--;
+    //printf("%s------n=%i----length =%i\n", buffer,n,strlen(buffer));
+    
+  }
+  if(n==0) {
+    printf("%s", buffer);
+  }
+  else{
+    perror("End of file reached before line");
+  }                  
+  free(buffer);
+  fclose(fp);
 }
 
 
@@ -639,10 +636,10 @@ char **getUserCommand(void) {
 }
 
 int confirmToQuit() {
-  printf("(JVG) are you sure you want to quit? enter y for yes and n for no\n(JVG)");
+  printf("Are you sure you want to quit? enter y for yes and n for no\n(JVG)");
   char *ans = malloc(sizeof(char) * BUFFER_SIZE);
   fgets(ans,sizeof(char) * 2, stdin);
-  int ret = strcmp(ans,"y")==0; 
+  int ret = strcmp(ans,"y")==0;
   if (ret==0 && strcmp(ans,"n")!=0) {
     free(ans);
     printf("Please enter a valid answer\n");
@@ -652,6 +649,22 @@ int confirmToQuit() {
   return ret;
 }
  
+ 
+void run(struct Processor *proc) {
+  if (programExitValue==1) {
+      printf("No programs running currently. The previous program has exited already so step cannot be executed\n");
+      return;
+  }
+  int retVal = 1;
+  while (retVal) {
+    retVal = carryOutInstruction(proc);  
+  }
+  fflush(stdout);
+  dumpProcessor(proc);
+  programExitValue = 1;
+  printf("Program exited normally.\n");
+}
+
 int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char **tokens) {
   if (strcmp(tokens[0], "reg")==0) {
     tokens++;
@@ -672,15 +685,16 @@ int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char *
     step(proc);
     return 0;
   } else if (strcmp(tokens[0], "list\n")==0) {
-    printLine(assembly, ((proc->pc)/4)+1);
+    listInstruction(assembly, ((proc->pc)/4)+1);
     return 0;
   } else if (strcmp(tokens[0], "--help\n")==0) {
     system("cat help.txt | less");
     return 0;
   } else if (strcmp(tokens[0], "run\n")==0) {
-    char cmd[] = "./emulate ";
-    *cmd = *strcat(cmd,bin);
-    system(cmd);
+    run(proc);
+    //char cmd[] = "./emulate ";
+    // *cmd = *strcat(cmd,bin);
+    //system(cmd);
     return 0;
   } else if (strcmp(tokens[0],"q")) {
     return confirmToQuit();
@@ -702,6 +716,6 @@ int main(int argc, char **argv) {
     tokens = getUserCommand();
     returnVal = executeUserCommand(fAssembly,fBin,proc,tokens);
   } while (!returnVal);
-  
+  printf("Thanks for using JVG debugger\n");  
   return EXIT_SUCCESS;
 }
