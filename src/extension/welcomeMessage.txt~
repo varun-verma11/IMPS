@@ -1,8 +1,8 @@
 
 
 ****************************************** 
-*  ________                   ________   * Welcome to JVG debugger.
-*  ________   \\        //   / _______   * This debugger can be used to
+*  ________                   _________  * Welcome to JVG debugger.
+*  ________   \\        //   / ________  * This debugger can be used to
 *      ||      \\      //   / /          * debug binary program which uses
 *      ||       \\    //   | |    ____   * IMPS instruction set.
 *  ||  ||        \\  //     \ \   __  |  *

@@ -12,7 +12,7 @@
 #define NUMBER_OF_COMMANDS 9
 #define BUFFER_SIZE 300      
                 
-char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "quit","--help"};
+char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help"};
 
 enum opCodes {HALT, ADD, ADDI, SUB,SUBI,MUL,MULI,LW,SW,BEQ, BNE, BLT, BGT, BLE, 
                 BGE, JMP, JR, JAL, OUT, DIV, DIVI, MOD, MODI, FACT, FACTI,SWAP};
@@ -548,11 +548,17 @@ void step(struct Processor *proc) {
   int retVal = carryOutInstruction(proc);
   if (retVal==0) {
     programExitValue= 1;
-    printf("Program exited normally.\n");
+    printf("\n\nProgram exited normally.\n");
   }
 }
 
-
+char *removeSpace(char *str) {
+  while(*str) {
+    if (isspace((int) *str)==0) return str;
+    str++;
+  }
+  return str;
+}
 
 /*
   The method binaryFileLoader loads the binary file in the memory of the given
@@ -598,7 +604,7 @@ void listInstruction(char *filepath, int n) {
     
   }
   if(n==0) {
-    printf("%s", buffer);
+    printf("%s", removeSpace(buffer));
   }
   else{
     perror("End of file reached before line");
@@ -652,7 +658,7 @@ char **getUserCommand(void) {
   printf("(JVG)");
   char *buff = malloc(BUFFER_SIZE);
   fgets(buff,BUFFER_SIZE,stdin);
-  char *ptr = malloc(10);
+  char *ptr = malloc(2);
   if( (ptr = strchr(buff, '\n')) != NULL) *ptr = '\0';
   char **tokens = malloc(sizeof(char) * BUFFER_SIZE);
   tokens = tokeniseUserCommand(buff);
@@ -664,7 +670,9 @@ char **getUserCommand(void) {
 int confirmToQuit() {
   printf("Are you sure you want to quit? enter y for yes and n for no\n(JVG)");
   char *ans = malloc(sizeof(char) * BUFFER_SIZE);
-  fgets(ans,sizeof(char) * 2, stdin);
+  fgets(ans,sizeof(char) * BUFFER_SIZE, stdin);
+  char *ptr = ans;
+  if( (ptr = strchr(ans, '\n')) != NULL) *ptr = '\0';
   int ret = strcmp(ans,"y")==0;
   if (ret==0 && strcmp(ans,"n")!=0) {
     free(ans);
@@ -719,10 +727,10 @@ int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char *
   } else if (strcmp(tokens[0], "run")==0) {
     run(proc);
     return 0;
-  } else if (strcmp(tokens[0],"quit")) {
+  } else if (strcmp(tokens[0],"q")==0) {
     return confirmToQuit();
-  } 
-  return 1;
+  }
+  return 0;
 }
 
 int main(int argc, char **argv) {
@@ -732,6 +740,7 @@ int main(int argc, char **argv) {
   char *fAssembly = argv[1];
   memset(proc,0,sizeof(struct Processor));
   binaryFileLoader(fBin,proc);
+  system("clear");
   printWelcomeMessage();
   char **tokens = malloc(sizeof(char) *BUFFER_SIZE);
   int returnVal = 0; 
