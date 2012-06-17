@@ -9,10 +9,10 @@
 
 #define MEMORY_SIZE 65536
 #define NUMBER_OF_REGISTERS 32
-#define NUMBER_OF_COMMANDS 9
+#define NUMBER_OF_COMMANDS 10
 #define BUFFER_SIZE 300      
                 
-char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help"};
+char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help","break"};
 
 enum opCodes {HALT, ADD, ADDI, SUB,SUBI,MUL,MULI,LW,SW,BEQ, BNE, BLT, BGT, BLE, 
                 BGE, JMP, JR, JAL, OUT, DIV, DIVI, MOD, MODI, FACT, FACTI,SWAP};
@@ -289,13 +289,20 @@ void searchMemory(struct Processor *proc, char **tokens) {
 
 void search(struct Processor *proc,char **tokens) {
   if (strcmp(tokens[0],"-M") ==0) {
+    printf("mem search\n");
     searchMemory(proc,tokens+1);
   } else if (strcmp(tokens[0],"-R")==0) {
     searchRegisters(proc,tokens+1);
   }
 }
 
-
+int checkIfBreakPoint(int *breakPoints, int lineNumber) {
+  while(*breakPoints) {
+    if (atoi(*breakPoints)==lineNumber) return 1;
+    breakPoints++;
+  }
+  return 0;
+}
 
 void printPC( struct Processor *proc) {
   printf("PC = %i \n",proc->pc);
@@ -557,6 +564,7 @@ char *removeSpace(char *str) {
     if (isspace((int) *str)==0) return str;
     str++;
   }
+  return str;
 }
 
 /*
@@ -698,7 +706,12 @@ void run(struct Processor *proc) {
   printf("Program exited normally.\n");
 }
 
-int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char **tokens) {
+void setBreakPoints(int *breakPoints,char **tokens) {
+  checkAllNumbersValid
+  
+}
+
+int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char **tokens, int *breakPoints) {
   if (strcmp(tokens[0], "reg")==0) {
     tokens++;
     printReg(proc, tokens);
@@ -728,6 +741,8 @@ int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char *
     return 0;
   } else if (strcmp(tokens[0],"q")==0) {
     return confirmToQuit();
+  } else if (strcmp(tokens[0],"break")==0) {
+    setBreakPoints(breakPoints,tokens);
   }
   return 0;
 }
