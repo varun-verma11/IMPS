@@ -9,10 +9,10 @@
 
 #define MEMORY_SIZE 65536
 #define NUMBER_OF_REGISTERS 32
-#define NUMBER_OF_COMMANDS 9
+#define NUMBER_OF_COMMANDS 10
 #define BUFFER_SIZE 300      
                 
-char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help"};
+char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help","break"};
 
 enum opCodes {HALT, ADD, ADDI, SUB,SUBI,MUL,MULI,LW,SW,BEQ, BNE, BLT, BGT, BLE, 
                 BGE, JMP, JR, JAL, OUT, DIV, DIVI, MOD, MODI, FACT, FACTI,SWAP};
@@ -57,7 +57,7 @@ int checkIfNumber(char *num) {
 }
 
 void printInvalidCommandMessage(void) {
-  printf("(JVG) invalid command. Please enter --help for help\n (JVG)");
+  printf("Invalid command. Please enter --help for help\n");
 }
 
 
@@ -87,10 +87,16 @@ int32_t getRegisterValue(struct Processor *proc, int8_t reg){
 void printReg(struct Processor *proc , char **tokens) {
   int start = 0 ;
   int end = NUMBER_OF_REGISTERS-1;
+    
   if (strcmp("-r",tokens[0])==0) {
     start = getRegisterNumber(tokens[1]);
     end   = getRegisterNumber(tokens[2]);
-    if(!start<end && !checkAllRegistersAreValid(tokens+1)){
+    tokens++;
+    if(start>end && !checkAllRegistersAreValid(tokens+1)){
+      printInvalidCommandMessage();
+      return;
+    }
+    if(tokens[2]!=NULL){
       printInvalidCommandMessage();
       return;
     }
@@ -103,24 +109,27 @@ void printReg(struct Processor *proc , char **tokens) {
     }
     int i =0;
     while(tokens[i]!=NULL) {
-        printf("%s = %i \t",tokens[i],getRegisterValue(proc, getRegisterNumber(tokens[i])));
+        printf("%s = %i, \t",tokens[i],getRegisterValue(proc, getRegisterNumber(tokens[i])));
         i++;
-      if (i%8==0) printf("      \n");
+      if (i%8==0) printf("\n");
     }
-    printf("\n (JVG)");    
-  
+    printf("\n");
+    return;    
   } 
   else if (!strcmp("-a",tokens[0])==0){
     printInvalidCommandMessage();
     return;
   } 
-  printf( "\nstart- > %i   end -> %i\n",start, end);
-  for (int i=start; i<end/8 ; i++) {     
+  int x=start;
+  for (int i=0; i<end%8 ; i++) {    
     for (int j=0;j<8 ; j++) {
-      printf("%s = %i \t",tokens[(i*j) + j],getRegisterValue(proc,getRegisterNumber(tokens[(i*j) + j])));
+      if(x>end) break;
+      printf("$%i = %i,\t",x,getRegisterValue(proc,x));
+      x++;
     }
-    printf("      \n");
-  }  
+    printf("\n");
+  }
+  printf("\n");
 }
 
 void searchRegisters(struct Processor *proc, char **tokens) {
@@ -187,13 +196,11 @@ uint32_t getMemory(struct Processor *proc, uint32_t address) {
 void printMemory(struct Processor *proc, char **tokens) {
   int start = 0;
   int end = MEMORY_SIZE-1;
-  if (checkIfAllMemoryLocationsAreValid(tokens+1)) {
-    printInvalidCommandMessage();
-    return;
-  }
-  if (strcmp(tokens[0],"-r")) {
+
+  if ((strcmp(tokens[0],"-r"))==0) {
     start = atoi(tokens[1]);
     end = atoi(tokens[2]);
+    tokens++;
     if (start>end) {
       printInvalidCommandMessage();
       return;
@@ -202,22 +209,30 @@ void printMemory(struct Processor *proc, char **tokens) {
        printInvalidCommandMessage();
        return;
     }
-  } else if (strcmp(tokens[0],"-m")) {
+  } else if ((strcmp(tokens[0],"-m"))==0) {
     int j=0;
+    tokens++;
+      if (!checkIfAllMemoryLocationsAreValid(tokens+1)) {
+        printInvalidCommandMessage();
+        return;
+      }
     while (*tokens) {
       printf("M%i=%i  ",atoi(*tokens),getMemory(proc,atoi(*tokens)));
       tokens++;
       j++;
       if (j%8==0) printf("\n");
     }
-  } else if (strcmp(tokens[0],"-a")!=0) {
+    printf("\n");
+    return; 
+  } else if ((strcmp(tokens[0],"-a"))!=0) {
     printInvalidCommandMessage();
     return;
   }
-  
-  for (int c=start; c<start/8 ; c++) {
-    for (int d=0;d<8 ;d++) {
-      printf("M%i=%i  ",(c*d) +d,getMemory(proc,atoi(*tokens)));
+  int x= start;
+  for (int c=0; x<end ; c++) {
+    for (int d=0;d<8&&x<=end ;d++) {
+      printf("M%i=%i \t",x,getMemory(proc,x));
+      x++;
     }
     printf("\n");
   }
@@ -274,13 +289,20 @@ void searchMemory(struct Processor *proc, char **tokens) {
 
 void search(struct Processor *proc,char **tokens) {
   if (strcmp(tokens[0],"-M") ==0) {
+    printf("mem search\n");
     searchMemory(proc,tokens+1);
   } else if (strcmp(tokens[0],"-R")==0) {
     searchRegisters(proc,tokens+1);
   }
 }
 
-
+int checkIfBreakPoint(int *breakPoints, int lineNumber) {
+  while(*breakPoints) {
+    if (atoi(*breakPoints)==lineNumber) return 1;
+    breakPoints++;
+  }
+  return 0;
+}
 
 void printPC( struct Processor *proc) {
   printf("PC = %i \n",proc->pc);
@@ -533,11 +555,17 @@ void step(struct Processor *proc) {
   int retVal = carryOutInstruction(proc);
   if (retVal==0) {
     programExitValue= 1;
-    printf("Program exited normally.\n");
+    printf("\n\nProgram exited normally.\n");
   }
 }
 
-
+char *removeSpace(char *str) {
+  while(*str) {
+    if (isspace((int) *str)==0) return str;
+    str++;
+  }
+  return str;
+}
 
 /*
   The method binaryFileLoader loads the binary file in the memory of the given
@@ -583,7 +611,7 @@ void listInstruction(char *filepath, int n) {
     
   }
   if(n==0) {
-    printf("%s", buffer);
+    printf("%s", removeSpace(buffer));
   }
   else{
     perror("End of file reached before line");
@@ -611,15 +639,24 @@ void dumpProcessor(struct Processor *proc) {
    }
 }
 
-
-
 void printWelcomeMessage(void){
-  printf("Welcome to JVG debugger for binary programs for IMPS instruction set. \n Please type the specific commands for the task or enter --help  for help. \n\n");
+  FILE *fp;
+  fp = fopen("welcomeMessage.txt","r");
+  char *buffer = (char *) malloc(BUFFER_SIZE * sizeof(char));
+  if (fp==NULL) {
+    perror("ERROR in opening file");
+    exit(EXIT_FAILURE);
+  }
+  while (!feof(fp)){
+    memset(buffer, 0, ((sizeof(char))*BUFFER_SIZE));
+    fgets (buffer, BUFFER_SIZE, fp); 
+    printf("%s",buffer);    
+  }
 }
 
 int checkUserCommandIsValid(char *command) {
   for (int i=0; i<NUMBER_OF_COMMANDS; i++) {
-    if (strncmp(command,debugInstructions[i],sizeof(char)*strlen(debugInstructions[i]))==0) return 1;
+    if (strcmp(command,debugInstructions[i])==0) return 1;
   }
   return 0;
 }
@@ -628,17 +665,21 @@ char **getUserCommand(void) {
   printf("(JVG)");
   char *buff = malloc(BUFFER_SIZE);
   fgets(buff,BUFFER_SIZE,stdin);
+  char *ptr = malloc(2);
+  if( (ptr = strchr(buff, '\n')) != NULL) *ptr = '\0';
   char **tokens = malloc(sizeof(char) * BUFFER_SIZE);
   tokens = tokeniseUserCommand(buff);
   if (checkUserCommandIsValid(tokens[0])) return tokens;
-  printf("(JVG) INVALID COMMAND: Please enter a valid command or type '--help' for help \n");
+  printInvalidCommandMessage();
   return getUserCommand();
 }
 
 int confirmToQuit() {
   printf("Are you sure you want to quit? enter y for yes and n for no\n(JVG)");
   char *ans = malloc(sizeof(char) * BUFFER_SIZE);
-  fgets(ans,sizeof(char) * 2, stdin);
+  fgets(ans,sizeof(char) * BUFFER_SIZE, stdin);
+  char *ptr = ans;
+  if( (ptr = strchr(ans, '\n')) != NULL) *ptr = '\0';
   int ret = strcmp(ans,"y")==0;
   if (ret==0 && strcmp(ans,"n")!=0) {
     free(ans);
@@ -665,7 +706,12 @@ void run(struct Processor *proc) {
   printf("Program exited normally.\n");
 }
 
-int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char **tokens) {
+void setBreakPoints(int *breakPoints,char **tokens) {
+  checkAllNumbersValid
+  
+}
+
+int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char **tokens, int *breakPoints) {
   if (strcmp(tokens[0], "reg")==0) {
     tokens++;
     printReg(proc, tokens);
@@ -674,32 +720,31 @@ int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char *
     tokens++;
     printMemory(proc, tokens);
     return 0;
-  } else if (strcmp(tokens[0], "pc\n")==0) {
+  } else if (strcmp(tokens[0], "pc")==0) {
     printPC(proc);
     return 0;
   } else if (strcmp(tokens[0], "search")==0) {
     tokens++;
     search(proc, tokens);
     return 0;
-  } else if (strcmp(tokens[0], "stp\n")==0) {
+  } else if (strcmp(tokens[0], "stp")==0) {
     step(proc);
     return 0;
-  } else if (strcmp(tokens[0], "list\n")==0) {
+  } else if (strcmp(tokens[0], "list")==0) {
     listInstruction(assembly, ((proc->pc)/4)+1);
     return 0;
-  } else if (strcmp(tokens[0], "--help\n")==0) {
+  } else if (strcmp(tokens[0], "--help")==0) {
     system("cat help.txt | less");
     return 0;
-  } else if (strcmp(tokens[0], "run\n")==0) {
+  } else if (strcmp(tokens[0], "run")==0) {
     run(proc);
-    //char cmd[] = "./emulate ";
-    // *cmd = *strcat(cmd,bin);
-    //system(cmd);
     return 0;
-  } else if (strcmp(tokens[0],"q")) {
+  } else if (strcmp(tokens[0],"q")==0) {
     return confirmToQuit();
+  } else if (strcmp(tokens[0],"break")==0) {
+    setBreakPoints(breakPoints,tokens);
   }
-  return 1;
+  return 0;
 }
 
 int main(int argc, char **argv) {
@@ -709,6 +754,7 @@ int main(int argc, char **argv) {
   char *fAssembly = argv[1];
   memset(proc,0,sizeof(struct Processor));
   binaryFileLoader(fBin,proc);
+  system("clear");
   printWelcomeMessage();
   char **tokens = malloc(sizeof(char) *BUFFER_SIZE);
   int returnVal = 0; 

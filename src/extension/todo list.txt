@@ -1,0 +1,3 @@
+things to do
+
+include the command rerun in the help and the documentation
