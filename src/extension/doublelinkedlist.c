@@ -8,15 +8,18 @@ struct ListElem {
   int numberOfElem;
   struct ListElem *next;
   struct ListElem *prev;
-  struct ListElem *current;
   char *command;
 };
 
 struct DLLIST {
   struct ListElem *start;
   struct ListElem *end;
+  struct ListElem *current;
 };
 
 
-void addToList(char *key, int value, struct Table *table);
+void addToList(char *key, int value, struct Processor *proc) {
+
+}
+
 int getValue(char *key, struct Table *table);

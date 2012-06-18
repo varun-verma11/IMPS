@@ -9,12 +9,12 @@
 
 #define MEMORY_SIZE 65536
 #define NUMBER_OF_REGISTERS 32
-#define NUMBER_OF_COMMANDS 10
+#define NUMBER_OF_COMMANDS 11
 #define NUMBER_OF_INSTRUCTIONS 26
 #define BUFFER_SIZE 300      
 #define BREAKPOINTS_ARRAY_SIZE 100
                 
-char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help","break"};
+char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help","break","back"};
 
 enum opCodes {HALT, ADD, ADDI, SUB,SUBI,MUL,MULI,LW,SW,BEQ, BNE, BLT, BGT, BLE, 
                 BGE, JMP, JR, JAL, OUT, DIV, DIVI, MOD, MODI, FACT, FACTI,SWAP};
