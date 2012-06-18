@@ -1,0 +1,42 @@
+﻿Extension: Debugger And Extended Instruction Set 
+
+
+Description
+
+The debugger JVG has been designed which allows a user to debug their IMPS assembly instrucion programs. The user has various different options which can be chosen at runtime to allow the user to track the error in their program. Once the user enters the debugger, the following welcome message is seen in the terminal.
+
+
+The “(JVG)” on the terminal indicates that the debugger is waiting for the user input, i.e. the command from user to carry out a a task. The list of commands can be obtained by typing “--help” which then further guides the user how to use the commands and gives deatiled description of each of the commands which a user is able to use in the JVG debugger.  
+
+The user has following options of commands:
+Print and search through some or all registers
+Print and search through some or all memory locations
+Use breakpoints in the given program
+Run a program
+Reset the state of processor to the state it was in at the start of program
+print contents of the processor in the current state.
+Step through the program
+quit the debugger
+print the current assmbly line which was just executed
+
+The debugger stops the program which is currently running and indicate the user if a segmentation fault could occur by executiong the current command. This is done by checking the instruction is a valid instruction. This involves checking the opcode value to see if it is within range of opcodes which are included in the extended opcode set. The operands values are checked to check they would cause a valid operation or not. This involves checking if carrying out the current operation would result in reading an invalid register or invalid memory location. For eg, if a instruction is trying to load a into register 1 the value stored at memory location 67000 which does not exists, or reading the value of $35 which is inexistent since an IMPS processor only has 32 general purpose registers.
+
+The debugger also has extensive checks for each of the input command for debugging  any IMPS program. This excludes the possbilities of invalid commands which could possible cause the debugger to break. The degubber has be made as robust as possible by inlcluding intensive checks before any command is executed or any instrucion is carried out. The possibility of segmentation faults which could be caused due to  broken assembly program is also been eliminated by including checks for the instruction being valid. 
+
+The debugger allows the user to print the current value stored in the program counter of the processor, the current line of code being executed. Other commands allow the user to set breakpoints at certain line numbers in the program currently being run. The list of commands is shown below which can also be obtained by entering the command “--help” in the debugger:
+list 
+pc
+search
+reg
+mem
+q
+break
+stp
+reset
+--help
+run
+The 'list' command prints the last command which was executed. The 'pc' comamnd prints the current value which is stored in the program counter of the processor. The 'search' command searches for a value in either registers or memory. The flags for the search command specify if the search is carried out in the memory or registers. The user can also search in all registers or all memory location or in the range specified which depends on the flags provided to the search command. The 'reg' command can be used to print value of either specific registers or registers within the speicified range or all registers which can be specified by the flags provided to the command 'reg'. The 'mem' command can be used to print value of either specific memory locations or memory locations within the speicified range or all memory locations which can be specified by the flags provided to the command 'mem'. The 'q' can be used to quit the debugger which asks the user to confirm the quit before exiting the debugger. The 'break' command can be used introduce and remove breakpoints from a  program. The 'stp' command carries out one instruction, this method provides feedback if the program has already been run before in which case 'stp' command cannot be executed. The command 'reset' resets the state of the cpu to the state in which the user can run or stp in the program again. The command '--help' provides the user with the list of commands which can be used in the debugger. The help command then further assists the user in order to allow the user to get the help for certain commands. The 'run' commands the runs the comeplete program.
+
+Design
+High-level features like modularity is used in the code. Some of the methods which are common to the debugger and the 
+

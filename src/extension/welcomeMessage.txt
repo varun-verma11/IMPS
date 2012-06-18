@@ -2,12 +2,12 @@
 ****************************************** 
 *  ________                   ________   * Welcome to JVG debugger.
 *  ________   \\        //   / _______   * This debugger can be used to
-*      ||      \\      //   / /          * debug binary program which uses
-*      ||       \\    //   | |    ____   * IMPS instruction set.
-*  ||  ||        \\  //     \ \   __  |  * Please type --help for help.
+*      ||      \\      //   / /          * debug binary program which
+*      ||       \\    //   | |    ____   * uses IMPS instruction set.
+*  ||  ||        \\  //     \ \   __  |  * 
 *  \\__//         \\//       \ \____| |  * 
-*   \__/           \/         \_______|  * Designed by Varun Verma, Jose Kalladanthyil, 
-*                                        * Ganesh Narendra Kumar
+*   \__/           \/         \_______|  * Please type --help for help.
+*                                        * 
 ****************************************** 
 
 
