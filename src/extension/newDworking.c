@@ -825,7 +825,10 @@ int carryOutInstruction(struct Processor *processor) {
   if(processor->pc == backupPC)  processor->pc += sizeof(uint32_t);
   return 1;
 }
-
+/*this method removes the space in a string
+@param  : a string which has white space in it
+@return : a string without the white spaces in it
+*/
 void step(struct Processor *proc) {
   if (programExitValue==1) {
     printf("No programs running currently. The previous program has exited already so step cannot be executed\n");
@@ -837,7 +840,10 @@ void step(struct Processor *proc) {
     printf("\n\nProgram exited normally.\n");
   }
 }
-
+/*This method removes the space in a string
+@param str : a string which has white space in it
+@return : a string without the white spaces in it
+*/
 char *removeSpace(char *str) {
   while(*str) {
     if (isspace((int) *str)==0) return str;
@@ -873,7 +879,13 @@ void binaryFileLoader(char *filepath, struct Processor *processor) {
   fread(processor->memory, sizeof(uint32_t), fileSize, fp);
   fclose(fp);
 }
+/* this method is used to get the specific line from the input file
+@param filepath : the path to the file to be searched
+@param n        : the line number to be retrieved
+@return         : returns no specific value however prints out the line if it 
+                  exist or prints End of file reached before line
 
+*/
 void listInstruction(char *filepath, int n) {
   FILE *fp;
   fp = fopen(filepath,"r");
@@ -917,7 +929,12 @@ void dumpProcessor(struct Processor *proc) {
       fprintf(stderr, "\n");
    }
 }
-
+/*
+  This method prints out the Welcome message at the at the start of the 
+  of the program.
+  @param   :Takes no parameters
+  @return  :Returns no values
+*/
 void printWelcomeMessage(void){
   FILE *fp;
   fp = fopen("welcomeMessage.txt","r");
@@ -932,14 +949,25 @@ void printWelcomeMessage(void){
     printf("%s",buffer);    
   }
 }
-
+/*
+  This method checks whether the user has inputted the right commands for 
+  the program.
+  @param  command: specifies the command to be used in the check
+  @return        : returns 1 if the command is valid and 0 if not
+*/
 int checkUserCommandIsValid(char *command) {
   for (int i=0; i<NUMBER_OF_COMMANDS; i++) {
     if (strcmp(command,debugInstructions[i])==0) return 1;
   }
   return 0;
 }
-
+/*
+  This is a method to get a command from the user. Endlessly loops to 
+  continuously get commands from the user until program is quit.
+  @param  : Takes no parameters
+  @return : Returns an array of strings that the user types into the debugger
+            that seem like valid commands
+*/
 char **getUserCommand(void) {
   printf("(JVG)");
   char *buff = malloc(BUFFER_SIZE);
@@ -953,6 +981,12 @@ char **getUserCommand(void) {
   return getUserCommand();
 }
 
+/*
+  This is a method to get confirmation from the user of quitting the 
+  program 
+  @param  :Takes no parameters
+  @return :returns 1 if the user wants to quit or 0 otherwise
+*/
 int confirmToQuit(void) {
   printf("Are you sure you want to quit? enter y for yes and n for no\n(JVG)");
   char *ans = malloc(sizeof(char) * BUFFER_SIZE);
@@ -969,7 +1003,13 @@ int confirmToQuit(void) {
   return ret;
 }
  
- 
+ /*
+  Runs the piece of code at the current step.
+  @param proc        : specifies the processor containing the PC values
+  @param breakPoints : specifies the break points to be checked for in the lines
+                       of code.
+  @return            : no return value.
+ */
 void run(struct Processor *proc,int *breakPoints) {
   if (programExitValue==1) {
       printf("No programs running currently. The previous program has exited already so step cannot be executed\n");
@@ -991,6 +1031,14 @@ void run(struct Processor *proc,int *breakPoints) {
   printf("\nProgram exited normally.\n");
 }
 
+/*
+  This method sets a breakpoint at every occurance of a breakpoint in the given 
+  tokens. 
+  @param breakPoints : specifies the line numbers to be used as break points
+  @param tokens      : specifies the array of strings to be used as the tokens 
+                       that need to be checked for numbers
+  @return            : no return value
+*/
 void setBreakPoints(int *breakPoints,char **tokens) {
   int i=0;
   if (strcmp(tokens[0],"-r")==0) {
@@ -1027,8 +1075,19 @@ void setBreakPoints(int *breakPoints,char **tokens) {
     free(temp);
   }
 }
-
-int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char **tokens, int *breakPoints) {
+/*
+  This method is used to execute the user command.
+  @param assembly    : specifies the assembly instruction to be used
+  @param bin         : specifies the binary code to be used
+  @param proc        : specifies the processor that contains the values used
+  @param tokens      : specifies the tokens to be used to execute the command
+  @param breakPoints : specifies the various line numbers to be used as break 
+                       points
+  @return            : returns 0 when executing any command except confirmation
+                       of the quit command
+*/
+int executeUserCommand(char *assembly, char *bin, struct Processor *proc, 
+                        char **tokens, int *breakPoints) {
   if (strcmp(tokens[0], "reg")==0) {
     tokens++;
     printReg(proc, tokens);
