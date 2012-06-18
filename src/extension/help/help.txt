@@ -10,8 +10,8 @@ pc                          :Displays the current value of the program counter.
 break -r                    :To add break points onto the current line
 break -a                    :To remove break points
 q                           :Quits the Debugger
-run                         :
-reset                       :
+run                         :Run the whole program till Halt
+reset                       :Reset the values in the processor for the program to run again 
 
 --------------------------------------------------------------------------------
 
