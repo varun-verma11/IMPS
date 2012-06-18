@@ -5,21 +5,18 @@
 #include <assert.h>
 
 struct ListElem {
-  int numberOfElem;
   struct ListElem *next;
   struct ListElem *prev;
-  char *command;
+  struct Processor *proc;
 };
 
 struct DLLIST {
+  int numberOfElem;
   struct ListElem *start;
   struct ListElem *end;
   struct ListElem *current;
+  int numberOfMaxElem ;
 };
 
 
-void addToList(char *key, int value, struct Processor *proc) {
-
-}
-
-int getValue(char *key, struct Table *table);
+void 
