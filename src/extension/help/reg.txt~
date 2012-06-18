@@ -1,6 +1,6 @@
-reg:
+reg -m:
 
-  reg <R>
+  reg -m <R>
   
   Displays the data stored in the specified register.
   eg. To display the contents of the register $4 enter the following command:
@@ -31,4 +31,6 @@ reg -m:
   useful when the data is needed from multiple registers that aren't 
   consecutive. Works with two or more registers.
   eg. To display the contents of registers 1, 3 and 7 enter the following 
-  command:  reg -m $1 $3 $7
+  command:
+
+  reg -m $1 $3 $7
