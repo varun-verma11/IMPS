@@ -1,0 +1,96 @@
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
+#include <ctype.h>
+
+
+#define MIN(a, b) (a > b ? b : a)
+
+#define MEMORY_SIZE 65536
+#define NUMBER_OF_REGISTERS 32
+#define NUMBER_OF_COMMANDS 8
+#define BUFFER_SIZE 300   
+
+
+void help(char **tokens){
+  if(tokens[1]!=NULL){
+    if(strcmp(tokens[1],"mem") ==0){
+      system("cat mem.txt");
+      return;
+    }
+    else if(strcmp(tokens[1],"reg") ==0){
+     system("cat reg.txt");
+     return;
+    }    
+    else if(strcmp(tokens[1],"search") ==0){
+     system("cat search.txt");
+     return;
+    }   
+  }
+  printf("hi\n");
+  system("cat help.txt");
+}
+int executeUserCommand(/*char *assembly, char *bin, struct Processor *proc,*/ char **tokens/*, int *breakPoints*/) {
+  if (strcmp(tokens[0], "reg")==0) {
+    tokens++;
+    //printReg(proc, tokens);
+    return 0;
+  } else if (strcmp(tokens[0], "mem")==0) {
+    tokens++;
+    //printMemory(proc, tokens);
+    return 0;
+  } else if (strcmp(tokens[0], "pc")==0) {
+    //printPC(proc);
+    return 0;
+  } else if (strcmp(tokens[0], "search")==0) {
+    //tokens++;
+    //search(proc, tokens);
+    return 0;
+  } else if (strcmp(tokens[0], "stp")==0) {
+    //step(proc);
+    return 0;
+  } else if (strcmp(tokens[0], "list")==0) {
+    //listInstruction(assembly, ((proc->pc)/4)+1);
+    return 0;
+  } else if (strcmp(tokens[0], "--help")==0) {
+    help(tokens);
+    return 0;
+  } else if (strcmp(tokens[0], "run")==0) {
+    //run(proc,breakPoints);
+    return 0;
+  } else if (strcmp(tokens[0],"q")==0) {
+    //return confirmToQuit();
+  } else if (strcmp(tokens[0],"break")==0) {
+    //setBreakPoints(breakPoints,tokens+1);
+    return 0;
+  }
+  return 0;
+}
+char **tokeniseUserCommand(char *command) {
+  char *buff = malloc(sizeof(char) * BUFFER_SIZE);
+  buff = strncpy(buff,command,sizeof(char) *BUFFER_SIZE);
+  char **tokens = malloc(sizeof(char) *BUFFER_SIZE);
+  char *token = malloc(50);
+  int i=0;
+  token = strtok(buff," ");
+  tokens[i] = token;
+  while(token!=0) {
+    i++;
+    token = strtok(NULL," ");
+    tokens[i] = token;
+  }  
+  return tokens;
+}
+
+int main(void){
+  char **tokens = malloc(300);
+  //char *cmd = malloc(100);
+  char* cmd = "--help sea";
+  tokens = tokeniseUserCommand(cmd);
+  executeUserCommand(tokens);
+  return 1;
+
+
+}
