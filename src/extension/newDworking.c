@@ -47,7 +47,11 @@ int getRegisterNumber(char *reg){
   return atoi(reg+1);
 }
 
-
+/*
+  This method checks if a given string is a number.
+  @param num : points to the string to be checked
+  @return    : returns 1 if true, 0 if false
+*/
 
 int checkIfNumber(char *num) {
   char *temp = num;
@@ -58,11 +62,21 @@ int checkIfNumber(char *num) {
   return 1;
 }
 
+/*
+  This method prints an "invalid command" error.
+  @param     : takes no parameters
+  @return    : no return value
+*/
 void printInvalidCommandMessage(void) {
   printf("Invalid command. Please enter --help for help\n");
 }
 
-
+/*
+  This method checks if all strings in the given array of strings are registers.
+  @param regs : points to the array of strings to be checked
+  @return     : returns 1 if all strings in the array are register names, 
+                0 otherwise
+*/
 int checkAllRegistersAreValid(char **regs) {
   while (*regs) {
     if (!checkRegister(*regs) || !checkIfNumber(*regs+1) || 
@@ -86,6 +100,17 @@ int32_t getRegisterValue(struct Processor *proc, int8_t reg){
   return proc->gpr[reg];
 }
 
+/*
+  This method prints the registers according to the tokens received. The tokens 
+  also contain print modifiers which specify any filters or parameters that the
+  print should satisfy, e.g. "-r" to print through the range of registers that 
+  follows.
+  @param proc: specifies the processor from which the register values are to be
+               returned
+  @param num : points to the array of tokens to be used during the printing
+               process
+  @return    : no return value
+*/
 void printReg(struct Processor *proc , char **tokens) {
   int start = 0 ;
   int end = NUMBER_OF_REGISTERS-1;
@@ -133,7 +158,17 @@ void printReg(struct Processor *proc , char **tokens) {
     printf("      \n");
   }  
 }
-
+/*
+  This method searches the registers for values specified in the tokens 
+  received. The tokens also contain search modifiers which specify any filters
+  or parameters that the search should satisfy, e.g. "-r" to search through the
+  range of registers that follows.
+  @param proc   : specifies the processor from which the register values are to 
+                  be obtained
+  @param tokens : points to the array of tokens to be used during the printing
+                  process
+  @return       : no return value
+*/
 void searchRegisters(struct Processor *proc, char **tokens) {
   int start =0;
   int end = NUMBER_OF_REGISTERS-1;
@@ -172,6 +207,14 @@ void searchRegisters(struct Processor *proc, char **tokens) {
   }
   printf("\n(JVG)");
 }
+
+/*
+  This method checks if all strings in the given array of strings are names of 
+  valid memory locations.
+  @param regs : points to the array of strings to be checked
+  @return     : returns 1 if all strings in the array are memory locations, 
+                0 otherwise
+*/
 int checkIfAllMemoryLocationsAreValid(char **tokens) {
   while(*tokens) {
     if (!checkIfNumber(*tokens) || atoi(*tokens) <0 
@@ -181,7 +224,7 @@ int checkIfAllMemoryLocationsAreValid(char **tokens) {
   return 1;
 }
 /*
-  This method returns the data stored at in the memory of the specifed processor
+  This method returns the data stored in the memory of the specifed processor
   at the specified address.
   @param proc    : specifies the processor 
   @param address : specifies the address of the memory which data has to be
@@ -193,6 +236,17 @@ uint32_t getMemory(struct Processor *proc, uint32_t address) {
   return *(uint32_t *)(proc->memory + address);
 }
 
+/*
+  This method prints the values memory locations according to the tokens 
+  received. The tokens also contain print modifiers which specify any filters or
+  parameters that the print should satisfy, e.g. "-r" to print through the
+  range of memory locations that follows.
+  @param proc: specifies the processor from which the memory values are to be
+               returned
+  @param num : points to the array of tokens to be used during the printing
+               process
+  @return    : no return value
+*/
 void printMemory(struct Processor *proc, char **tokens) {
   int start = 0;
   int end = MEMORY_SIZE-1;
@@ -239,7 +293,12 @@ void printMemory(struct Processor *proc, char **tokens) {
   
 }
 
-
+/*
+  This method breaks up a given string into tokens which seperate register
+  values, memory locations, search modifiers, etc
+  @param command: specifies the string to be tokenised
+  @return       : returns an array of strings which can be used as tokens
+*/
 char **tokeniseUserCommand(char *command) {
   char *buff = malloc(sizeof(char) * BUFFER_SIZE);
   buff = strncpy(buff,command,sizeof(char) *BUFFER_SIZE);
@@ -255,7 +314,17 @@ char **tokeniseUserCommand(char *command) {
   }  
   return tokens;
 }
-
+/*
+  This method searches the memory locations for values specified in the tokens 
+  received. The tokens also contain search modifiers which specify any filters
+  or parameters that the search should satisfy, e.g. "-r" to search through the
+  range of memory locations that follows.
+  @param proc   : specifies the processor from which the memory values are to 
+                  be obtained
+  @param tokens : points to the array of tokens to be used during the printing
+                  process
+  @return       : no return value
+*/
 void searchMemory(struct Processor *proc, char **tokens) {
   int start =0;
   int end = MEMORY_SIZE-1;
@@ -294,7 +363,14 @@ void searchMemory(struct Processor *proc, char **tokens) {
   printf("\n(JVG)");
 }
 
-
+/*
+  This method begins the search process by checking if the tokens point towards
+  a memory location or a register and calling the required method.
+  @param proc   : specifies the processor to be passed as one of the arguments
+                  to the functions called
+  @param tokens : specifies the tokens to be used in the check
+  @return       : no return value
+*/
 void search(struct Processor *proc,char **tokens) {
   if (strcmp(tokens[0],"-M") ==0) {
     printf("mem search\n");
@@ -304,6 +380,13 @@ void search(struct Processor *proc,char **tokens) {
   }
 }
 
+/*
+  This method uses an array of integest to check if the line number specified is
+  a break point. 
+  @param breakPoints : points to the integers that indicate the breakpoints
+  @param lineNumber  : specifies the line number
+  @return            : returns 1 if the line number is a break point, 0 if not
+*/
 int checkIfBreakPoint(int *breakPoints, int lineNumber) {
   for (int i=0; i<BREAKPOINTS_ARRAY_SIZE ;i++) {
     if (breakPoints[i]==lineNumber) return 1;
@@ -312,7 +395,12 @@ int checkIfBreakPoint(int *breakPoints, int lineNumber) {
   }
   return 0;
 }
-
+/*
+  This method prints the current value of the program counter(PC).
+  @param proc : specifies the processor from which the PC value is to be 
+                obtained
+  @return     : no return value
+*/
 void printPC( struct Processor *proc) {
   printf("PC = %i \n",proc->pc);
 }
@@ -331,6 +419,7 @@ uint8_t getOpcode(uint32_t instruction) {
   uint8_t opCode = (int) opcd;
   return opCode;
 }
+
 /*
   This method returns the bit 6 to 31 of the given instruction, i.e. the address
   for j-type instructions
@@ -342,6 +431,7 @@ uint32_t getAddress(uint32_t instruction) {
   uint32_t mask = 0x03ffffff;
   return mask & instruction;
 }
+
 /*
   This method returns the bit 6 to 10 of the given instruction
   @param instruction : this specifies the instruction
@@ -355,6 +445,7 @@ uint8_t getR1(uint32_t instruction){
   return r1;
 
 }
+
 /*
   This method returns the bit 11 to 15 of the given instruction
   @param instruction : this specifies the instruction
@@ -368,7 +459,6 @@ uint8_t getR2(uint32_t instruction) {
   return r2;
 }
 
-
 /*
   This method returns the bit 16 to 21 of the given instruction
   @param instruction : this specifies the instruction
@@ -378,7 +468,9 @@ uint8_t getR2(uint32_t instruction) {
 uint8_t getR3(uint32_t instruction) {
   uint32_t mask = 0x0007C00;
   return ((mask & instruction) >> 11);
-}/*
+}
+
+/*
   This method returns the bit 16 to 31 of the given instruction
   @param instruction : this specifies the instruction
   @return            : the method returns 8 bit representation of the bit 16 to 
@@ -388,7 +480,6 @@ int16_t getImmediateValue(uint32_t instruction) {
   uint32_t mask = 0x0000ffff;
   return (int16_t)(mask & instruction);
 }
-
 
 /*
   This method sets the value of the memory at the specified addredd to the value
@@ -402,7 +493,6 @@ void setMemory(struct Processor *proc, uint32_t address, int32_t value) {
   *(uint32_t *)(proc->memory + address) = value;
 }
 
-
 /*
   This method returns the instruction stored in the memory at address specified
   by the program counter of the processor.
@@ -413,11 +503,21 @@ uint32_t getInstructionAtPC(struct Processor *proc){
   return *(uint32_t *)(proc->memory + proc->pc);
 }
 
+/*
+  This method prints a segmentation fault error message.
+  @param    : takes no parameters
+  @return   : no return value
+*/
 void printSegmentationFaultMessage(void) {
   printf("Executing the current line would cause segmentation fault.\n");
   printf("Please use the 'list' command to track the line where the error occurred\n");
 }
 
+/*
+  This method checks if the given instruction is a valid R-type instruction.
+  @param ins  : this specifies the instruction
+  @return     : 
+*/
 int checkRtypeInstructionIsValid(uint32_t ins) {
   uint8_t r1 = getR1(ins);
   uint8_t r2 = getR2(ins);
@@ -430,7 +530,15 @@ int checkRtypeInstructionIsValid(uint32_t ins) {
   return 1;
 }
 
-int checkBrachInstructionIsValid(uint32_t ins, struct Processor *proc) {
+/*
+  This method checks if the given instruction is a valid branch instruction. 
+  @param ins  : specifies the instruction to be used for the check
+  @param proc : specifies the processor which contains the values registers and 
+                program counter
+  @return     : returns 1 if the instruction is a valid branch instruction,
+                0 if not
+*/
+int checkBranchInstructionIsValid(uint32_t ins, struct Processor *proc) {
   uint8_t r1 = getR1(ins);
   uint8_t r2 = getR2(ins);
   int16_t iVal = getImmediateValue(ins);
@@ -443,6 +551,12 @@ int checkBrachInstructionIsValid(uint32_t ins, struct Processor *proc) {
   return 1;
 }
 
+/*
+  This method checks if the given instruction is a valid I-type instruction. 
+  @param ins  : specifies the instruction to be used for the check
+  @return     : returns 1 if the instruction is a valid I-type instruction,
+                0 if not
+*/
 int checkItypeInstructionIsValid(uint32_t ins) {
   uint8_t r1 = getR1(ins);
   uint8_t r2 = getR2(ins);
@@ -453,6 +567,12 @@ int checkItypeInstructionIsValid(uint32_t ins) {
   return 1;
 }
 
+/*
+  This method checks if the given instruction is a valid J-type instruction. 
+  @param ins  : specifies the instruction to be used for the check
+  @return     : returns 1 if the instruction is a valid J-type instruction,
+                0 if not
+*/
 int checkJtypeIsValid(uint32_t ins) {
   uint32_t add = getAddress(ins);
   if (add<0 || add>=MEMORY_SIZE) {
@@ -462,6 +582,12 @@ int checkJtypeIsValid(uint32_t ins) {
   return 1;
 }
 
+/*
+  This method checks if the given instruction is a valid "load" or "store" 
+  instruction. 
+  @param ins  : specifies the instruction to be used for the check
+  @return     : returns 1 if the "load"/"store" instruction is valid, 0 if not
+*/
 int checkIfLoadAndStoreAreValid(uint32_t ins) {
   uint8_t r1 = getR1(ins);
   uint8_t r2 = getR2(ins);
@@ -474,6 +600,13 @@ int checkIfLoadAndStoreAreValid(uint32_t ins) {
   return 1;
 }
 
+/*
+  This method checks if the current intruction is valid. 
+  @param processor : specifies the processor which contains the value of the 
+                     program counter
+  @return          : returns 1 if the instruction at PC is a valid instruction,
+                     0 if not
+*/
 int checkIfInstructionIsValid(struct Processor *processor) {
   uint32_t instruction = getInstructionAtPC(processor);
   uint8_t opcode = getOpcode(instruction);
@@ -492,12 +625,12 @@ int checkIfInstructionIsValid(struct Processor *processor) {
     case MULI : return checkItypeInstructionIsValid(instruction)!=0;
     case LW   : return checkIfLoadAndStoreAreValid(instruction)!=0; 
     case SW   : return checkIfLoadAndStoreAreValid(instruction)!=0;
-    case BEQ  : return checkBrachInstructionIsValid(instruction,processor)!=0;
-    case BNE  : return checkBrachInstructionIsValid(instruction,processor)!=0; 
-    case BLT  : return checkBrachInstructionIsValid(instruction,processor)!=0;
-    case BGT  : return checkBrachInstructionIsValid(instruction,processor)!=0;
-    case BLE  : return checkBrachInstructionIsValid(instruction,processor)!=0;
-    case BGE  : return checkBrachInstructionIsValid(instruction,processor)!=0;
+    case BEQ  : return checkBranchInstructionIsValid(instruction,processor)!=0;
+    case BNE  : return checkBranchInstructionIsValid(instruction,processor)!=0; 
+    case BLT  : return checkBranchInstructionIsValid(instruction,processor)!=0;
+    case BGT  : return checkBranchInstructionIsValid(instruction,processor)!=0;
+    case BLE  : return checkBranchInstructionIsValid(instruction,processor)!=0;
+    case BGE  : return checkBranchInstructionIsValid(instruction,processor)!=0;
     case JMP  : return checkJtypeIsValid(instruction)!=0;
     case JR   : return checkRtypeInstructionIsValid(instruction)!=0;
     case JAL  : return checkJtypeIsValid(instruction)!=0;
@@ -512,6 +645,13 @@ int checkIfInstructionIsValid(struct Processor *processor) {
     default   : return 0;
   }
 }
+/*
+  This method carries out the instruction and returns the integer result of the 
+  operation.
+  @param processor : specifies the processor from which the instruction, 
+                     register and program counter values are to be taken
+  @return          : returns the integer that is the result of the operations
+*/
 int carryOutInstruction(struct Processor *processor) {
   uint32_t instruction = getInstructionAtPC(processor);
   uint8_t opcode = getOpcode(instruction);
@@ -573,42 +713,42 @@ int carryOutInstruction(struct Processor *processor) {
                   getRegisterValue(processor, getR1(instruction)));
                 break;
                 
-    case BEQ  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+    case BEQ  : if (checkBranchInstructionIsValid(instruction,processor)==0) 
                   return 0;
                 if (processor->gpr[getR1(instruction)] == 
                     processor->gpr[getR2(instruction)]) 
                   { processor->pc += getImmediateValue(instruction) * 4;};
                 break;
                   
-    case BNE  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+    case BNE  : if (checkBranchInstructionIsValid(instruction,processor)==0) 
                 return 0;
                 if (processor->gpr[getR1(instruction)] != 
                     processor->gpr[getR2(instruction)]) 
                 { processor->pc += getImmediateValue(instruction) * 4;};
                 break;
                   
-    case BLT  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+    case BLT  : if (checkBranchInstructionIsValid(instruction,processor)==0) 
                 return 0;
                 if (processor->gpr[getR1(instruction)] <
                    processor->gpr[getR2(instruction)])
                 { processor->pc += getImmediateValue(instruction) * 4;};
                 break;
                   
-    case BGT  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+    case BGT  : if (checkBranchInstructionIsValid(instruction,processor)==0) 
                 return 0;
                 if (processor->gpr[getR1(instruction)] >
                   processor->gpr[getR2(instruction)]) 
                 { processor->pc += getImmediateValue(instruction) * 4;};
                 break;
                   
-    case BLE  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+    case BLE  : if (checkBranchInstructionIsValid(instruction,processor)==0) 
                   return 0;
                 if (processor->gpr[getR1(instruction)] <= 
                    processor->gpr[getR2(instruction)]) 
                 { processor->pc += getImmediateValue(instruction) * 4;};
                 break;
                   
-    case BGE  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+    case BGE  : if (checkBranchInstructionIsValid(instruction,processor)==0) 
                 return 0;
                 if (processor->gpr[getR1(instruction)] >= 
                    processor->gpr[getR2(instruction)]) 
@@ -813,7 +953,7 @@ char **getUserCommand(void) {
   return getUserCommand();
 }
 
-int confirmToQuit() {
+int confirmToQuit(void) {
   printf("Are you sure you want to quit? enter y for yes and n for no\n(JVG)");
   char *ans = malloc(sizeof(char) * BUFFER_SIZE);
   fgets(ans,sizeof(char) * BUFFER_SIZE, stdin);
