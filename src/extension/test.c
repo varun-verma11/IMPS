@@ -197,12 +197,49 @@ void printMemory(struct Processor *proc, char **tokens) {
   }
   
 }
-
+void searchRegisters(struct Processor *proc, char **tokens) {
+  int start =0;
+  int end = NUMBER_OF_REGISTERS-1;
+  if (!checkIfNumber(tokens[1])) {
+    printInvalidCommandMessage();
+    return;
+  }
+  int value = atoi(tokens[1]);
+  
+  if (!checkAllRegistersAreValid(tokens+2)) {
+    printInvalidCommandMessage();
+    return;
+  }
+  
+  if (strcmp(tokens[0],"-r")==0) {
+    start = getRegisterNumber(tokens[2]);
+    end = getRegisterNumber(tokens[3]);
+    if (start>end) {
+      printInvalidCommandMessage();
+      return;
+    }
+    if (tokens[4]!=NULL) {
+       printInvalidCommandMessage();
+       return;
+    }
+  } else if (strcmp(tokens[0],"-a")!=0 || tokens[1]!=NULL) {
+    printInvalidCommandMessage();
+    return;
+  }
+  
+  printf("\n(JVG)");
+  for (int i = start; i<=end ; i++) {
+    if (proc->gpr[i]==value) {
+      printf("$%i=%i  ",i,value);
+    }
+  }
+  printf("\n(JVG)");
+}
 void searchMemory(struct Processor *proc, char **tokens) {
   int start =0;
   int end = MEMORY_SIZE-1;
   printf("%s \n",tokens[0]);
-  printf("tokens1%s, tokens 2 %s\n",tokens[0],tokens[1]);
+  printf("tokens[0] %s, tokens[1] %s\n",tokens[0],tokens[1]);
   if (!checkIfAllMemoryLocationsAreValid(tokens+1)) {
     printInvalidCommandMessage();
     return;
@@ -219,15 +256,21 @@ void searchMemory(struct Processor *proc, char **tokens) {
        printInvalidCommandMessage();
        return;
     }
-  } else if (strcmp(tokens[0],"-a")!=0) {
+  } 
+  else if (strcmp(tokens[0],"-a")!=0||tokens[1]!=NULL) {
     printInvalidCommandMessage();
     return;
   }
   printf("\n(JVG)");
-  for (int i = start; i<end ; i++) {
-    if (proc->gpr[i]==value) {
-      printf("M%i=%i  ",i,value);
+  int x = start;
+  for (int i = 0; i<=end ; i++) {
+   for(int j =0 ; j<8&&x<=end; j++){
+    if (proc->gpr[x]==value) {
+      printf("M%i=%i  ",x,value);
     }
+    x++;
+   }
+   printf("\n");
   }
   printf("\n(JVG)");
 }
@@ -236,7 +279,7 @@ void search(struct Processor *proc,char **tokens) {
   if (strcmp(tokens[0],"-M") ==0) {
     searchMemory(proc,tokens+1);
   } else if (strcmp(tokens[0],"-R")==0) {
-    //searchRegisters(proc,tokens+1);
+    searchRegisters(proc,tokens+1);
   }
 }
 
@@ -302,7 +345,7 @@ int main(void) {
   memset(proc,0,sizeof(struct Processor));
   char **tokens = malloc(300);
   //char *cmd = malloc(100);
-  char* cmd = "search -M -r 10 20";
+  char* cmd = "search -R -a 0 $21";
   tokens = tokeniseUserCommand(cmd);
   executeUserCommand(proc, tokens);
   return 1;
