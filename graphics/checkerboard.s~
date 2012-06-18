@@ -29,16 +29,16 @@ start_check_board:  addi $1 $0 80               - Load $1 with ascii value for P
                     addi $1 $0 53               - Load $1 with ascii value for 5
                     out $1                      - Print value for 5
 
-start_loop:       addi $1  $0 board_row
-                  addi $2  $0 board_col
-                  addi $3  $0 square_row
-                  addi $4  $0 square_column
-                  addi $9  $0 w_r               - $9 = r component of paint (set to white)
+start_loop:       addi $1 $0 board_row
+                  addi $2 $0 board_col
+                  addi $3 $0 square_row
+                  addi $4 $0 square_column
+                  addi $9 $0 w_g                - $9 = r component of paint (set to white)
                   addi $10 $0 w_g               - $10 = g component of paint (set to white)
                   addi $11 $0 w_b               - $11 = b component of paint (set to white)
                   addi $15 $0 255
                   addi $16 $0 0
-                  add  $5 $0 $0
+                  add $5 $0 $0
              
 row_loop:    bge $5 $1 end_r_loop
              add $6 $0 $0
