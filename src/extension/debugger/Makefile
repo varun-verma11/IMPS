@@ -1,0 +1,34 @@
+CC      = gcc
+CFLAGS  = -Wall -pedantic -std=c99
+
+.SUFFIXES: .c .o
+
+.PHONY: all clean
+
+all: debugger
+
+print.o              : print.c debugger.h
+checks.o             : checks.c checks.h debugger.h parser.h print.h
+printSearchRegMem.o  : printSearchRegMem.c
+debugger.o           : debugger.c print.h checks.h carryOutInstruction.h printSearchRegMem.h 
+carryOutInstruction.o: carryOutInstruction.c carryOutInstruction.h 
+emulate.o 	     : emulate.c carryOutInstruction.h emulate.h 
+parser.o	     : parser.c parser.h table.h 
+checkOptype.o	     : checkOptype.c checkOptype.h 
+tokeniser.o	     : tokeniser.c tokeniser.h 
+table.o 	     : table.c table.h 
+assemble.o	     : assemble.c assemble.h parser.h checkOptype.h tokeniser.h table.h 
+
+
+debugger 	     : debugger.o print.o checks.o printSearchRegMem.o
+	$(CC) $(CFLAGS) -o $@ $^
+emulate: emulate.o carryOutInstruction.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+assemble: assemble.o parser.o checkOptype.o tokeniser.o table.o
+	$(CC)  $(CFLAGS) -o $@ $^
+clean:
+	rm -f *.o
+	rm -f assemble
+	rm -f emulate
+	rm -f extension

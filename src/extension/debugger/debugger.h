@@ -1,0 +1,31 @@
+#ifndef DEBUGGER_H
+#define DEBUGGER_H
+
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MIN(a, b) (a > b ? b : a)
+
+#define MEMORY_SIZE 65536
+#define NUMBER_OF_REGISTERS 32
+#define NUMBER_OF_COMMANDS 10
+#define NUMBER_OF_INSTRUCTIONS 26
+#define BUFFER_SIZE 300      
+#define BREAKPOINTS_ARRAY_SIZE 100
+                
+char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help","break","reset"};
+
+struct Processor {
+  uint32_t pc;
+  int32_t gpr[NUMBER_OF_REGISTERS];
+  uint8_t memory[MEMORY_SIZE]; 
+};
+
+//this is a global constant to store the state of the program, i.e. value 1 if program ran.
+int extern programExitValue;
+
+#endif

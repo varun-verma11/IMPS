@@ -17,8 +17,6 @@ table.o : table.c table.h
 
 assemble.o: assemble.c assemble.h parser.h checkOptype.h tokeniser.h table.h
 
-emulate.o : emulate.c
-
 carryOutInstruction.o: carryOutInstruction.c carryOutInstruction.h
 
 emulate.o : emulate.c carryOutInstruction.h emulate.h

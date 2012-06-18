@@ -1,0 +1,141 @@
+#include "parser.h"
+
+/*
+  This method returns the label in the given instruction.
+  @instruction : specifies the instruction
+*/
+char *getLabel(char *instruction) {
+  char *inscpy = (char *) malloc(sizeof(instruction));
+  inscpy =strcpy(inscpy,instruction);
+  return strtok(inscpy,":");
+}
+
+/*
+  This method checks whether a token contains a hex value or not
+  @param token : specifies the token whose to be checked
+  @return      : returns 1 if the value in the token is a hex value
+*/
+int checkHex(char *token){
+  char *hex = "0x";
+  char *regs = (char *) malloc(sizeof(char) *3);
+  regs = strncpy(regs,token,2);
+  if(strcmp(hex , regs)==0) return 1;
+  return 0;
+}
+
+/*
+  This method carries out the parsing for a .fill opcode
+  @param tokens : specifies the tokens for the instruction which have 
+                  to be parsed
+  @param table  : specifes the table which contains the label values for the
+                  for the current file being assemblled.
+  @return       : returns a 32-bit representation of the instruction spefied by
+                  the tokens
+*/
+uint32_t parse_fill(char **tokens, struct Table table) {
+  //if : .fill operand --> that memory block is permanently assigned to operand.
+  if(checkHex(tokens[2])){
+    return strtol(tokens[3],NULL,16);
+  } else{
+    return atoi(tokens[3]);
+  }
+  
+}
+
+/*
+  This method returns an integer value for the given register
+  @param reg : specifes the reg whose int value has to be returned
+  @return    : returns integer representation of the given string value 
+               representation of the token
+*/
+int getRegisterNumber(char *reg){
+  return atoi(reg+1);
+}
+
+/*
+  This method returns an integer value for the given register
+  @param token : specifes the token whose  value has to be checked to see if it
+                 is a label
+  @return      : returns 1 if the value in the token is a label
+*/
+int checkLabel(char *token){
+  if((strcmp("a", token)<=0 && strcmp(token, "{")<0) || 
+      (strcmp("A", token)<=0 && strcmp("[", token)>0)) 
+  return 1;
+  return 0; 
+}
+
+/*
+  This method checks if the given tokenn is a register or not.
+  @param token : specifes the token to be checked
+  @return      : returns 1 if the given token is a register
+*/
+int checkRegister(char *token){
+ return (token!=NULL) ? (token[0]=='$') : 0;
+}
+
+/*
+  This method carries out the parsing for an r type instruction
+  @param tokens : specifies the tokens for the instruction which have 
+                  to be parsed
+  @param table  : specifes the table which contains the opcode values for the
+                  for the current file being assemblled.
+  @return       : returns a 32-bit representation of the instruction spefied by
+                  the tokens
+*/
+uint32_t parser_r(char **tokens, struct Table *table){
+  uint32_t opcode = getValue(tokens[0],table)<<26;
+	uint32_t reg1Opcode = (checkRegister(tokens[1])) ? getRegisterNumber(tokens[1]) <<21 : 0;
+	uint32_t reg2Opcode = (checkRegister(tokens[2])) ? getRegisterNumber(tokens[2]) <<16 : 0;
+	uint32_t reg3Opcode = (checkRegister(tokens[3])) ? getRegisterNumber(tokens[3]) <<11 : 0;
+	return (opcode + reg1Opcode + reg2Opcode + reg3Opcode);
+}
+
+/*
+  This method carries out the parsing for an i type instruction
+  @param tokens      : specifies the tokens for the instruction which have 
+                       to be parsed
+  @param labeltable  : specifes the table which contains the label values for 
+                       the for the current file being assemblled.
+  @param opcodeTable : specifres the table which contains the opcodes values for
+                       the IMPS instruction set
+  @return            : returns a 32-bit representation of the instruction spefied by
+                       the tokens
+*/
+uint32_t parser_i(char **tokens,struct Table *labelTable, struct Table *opcodeTable, uint32_t addr){
+  uint32_t opcode = getValue(tokens[0],opcodeTable);
+  uint32_t immediateValue;
+  uint32_t reg1Opcode = getRegisterNumber(tokens[1])<<21;
+  uint32_t reg2Opcode = getRegisterNumber(tokens[2])<<16;
+  if(checkHex(tokens[3])){
+    immediateValue = strtol(tokens[3],NULL,16);
+  } else if(checkLabel(tokens[3])) {
+    immediateValue = getValue(tokens[3],labelTable);    
+    if (opcode>=9 && opcode<=15) immediateValue = (immediateValue-addr)/4 ;
+  }else{
+    immediateValue = atoi(tokens[3]);
+  }
+  return ((opcode<<26) + reg1Opcode + reg2Opcode + immediateValue);
+}
+
+/*
+  This method carries out the parsing for an j type instruction
+  @param tokens      : specifies the tokens for the instruction which have 
+                       to be parsed
+  @param labeltable  : specifes the table which contains the label values for 
+                       the for the current file being assemblled.
+  @param opcodeTable : specifres the table which contains the opcodes values for
+                       the IMPS instruction set
+  @return            : returns a 32-bit representation of the instruction spefied by
+                       the tokens
+*/
+uint32_t parser_j(char **tokens, struct Table *labelTable, struct Table *opcodeTable){
+  uint32_t address;
+  uint32_t opcode = getValue(tokens[0],opcodeTable)<<26;
+  if(checkLabel(tokens[1])){
+    address = getValue(tokens[1],labelTable);
+  } else {
+    address = strtol(tokens[1],NULL,16);
+  }
+  return address+opcode;
+}

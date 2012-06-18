@@ -1,0 +1,22 @@
+#ifndef EMULATE_H
+#define EMULATE_H
+
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
+#include "enum.h"
+
+#define MIN(a, b) (a > b ? b : a)
+
+#define MEMORY_SIZE 65536
+#define NUMBER_OF_REGISTERS 32
+
+
+
+void binaryFileLoader(char *filepath, struct Processor *processor);
+void dumpProcessor(struct Processor *proc);
+
+
+#endif
