@@ -3,17 +3,15 @@ the function and usage of each command follows.
 
 list                        :Displays the current line of code that the debugger points to.   
 stp			    :Steps through the program to the next line of code and displays it.
-reg -a			    :Press --help reg for more info
-reg -r <R1> <Rn>	    :Press --help reg for more info
-reg -m <R1> <R2> ... <Rn>   :Press --help reg for more info
-mem <M>			    :Press --help mem for more info
-mem -a   		    :Press --help mem for more info
-mem -r <M1> <Mn> 	    :Press --help mem for more info
-search -M <I> <M1> <M2>     :Press --help search for more info
-search -M -a <I>  	    :Press --help search for more info
-search -R <I> <R1> <R2>     :Press --help search for more info
-search -R -a <I>            :Press --help search for more info
+reg      		    :Press --help reg for more info
+mem 			    :Press --help mem for more info
+search    		    :Press --help search for more info
 pc                          :Displays the current value of the program counter.
+break -r                    :To add break points onto the current line
+break -a                    :To remove break points
+q                           :Quits the Debugger
+run                         :
+reset                       :
 
 --------------------------------------------------------------------------------
 
