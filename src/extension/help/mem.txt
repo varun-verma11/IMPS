@@ -1,0 +1,26 @@
+mem:
+
+  mem <M>
+  
+  Displays the data stored in the specified memory location.
+  eg. To display the data stored in memory location 4 enter the following
+  command:
+  
+  mem 4
+  
+mem -a:
+
+  mem -a
+  
+  Displays all memory locations and the data stored in each of them.
+  
+mem -r:
+
+  mem -r <M1> <Mn>
+  
+  Displays the memory locations within the specified range and the data stored 
+  in them. The display is inclusive of the extreme bounds of the range.
+  eg. To display the contents of memory locations 1 through 9 enter the
+  following command:
+  
+  mem -r 1 9

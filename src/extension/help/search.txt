@@ -1,0 +1,26 @@
+search -M:
+
+  search -M -r <I> <M1> <Mn>
+  
+  Retrieves all memory locations within the specified range between <M1> and
+  <Mn> inclusive that contain the specified integer <I>·
+
+search -M -a:
+  
+  search -M -a <I>
+
+  Retrieves all memory locations that contain the specified integer.
+
+search -R:
+
+  search -R -r <I> <R1> <Rn>
+  
+  Retrieves all registers within the specified range between <R1> and
+  <Rn> inclusive that contain the specified integer <I>·
+
+search -R -a:
+  
+  search -R -a <I>
+
+  Retrieves all registers that contain the specified integer.
+
