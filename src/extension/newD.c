@@ -10,7 +10,9 @@
 #define MEMORY_SIZE 65536
 #define NUMBER_OF_REGISTERS 32
 #define NUMBER_OF_COMMANDS 10
+#define NUMBER_OF_INSTRUCTIONS 26
 #define BUFFER_SIZE 300      
+#define BREAKPOINTS_ARRAY_SIZE 100
                 
 char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help","break"};
 
@@ -120,15 +122,14 @@ void printReg(struct Processor *proc , char **tokens) {
     printInvalidCommandMessage();
     return;
   } 
-  int x=start;
-  for (int i=0; i<end%8 ; i++) {    
-    for (int j=0;j<8 ; j++) {
-      if(x>end) break;
-      printf("$%i = %i,\t",x,getRegisterValue(proc,x));
-      x++;
+
+  for(int i = 0; i <=end/8; i++) {
+    for(int j = 0; j < 8; j++) {
+       int reg = i * 8 + j;
+       fprintf(stderr, "R%d=%d\t", reg, getRegisterValue(proc, reg));
     }
-    printf("\n");
-  }
+      fprintf(stderr, "\n");
+   }
   printf("\n");
 }
 
@@ -297,9 +298,10 @@ void search(struct Processor *proc,char **tokens) {
 }
 
 int checkIfBreakPoint(int *breakPoints, int lineNumber) {
-  while(*breakPoints) {
-    if (atoi(*breakPoints)==lineNumber) return 1;
-    breakPoints++;
+  for (int i=0; i<BREAKPOINTS_ARRAY_SIZE ;i++) {
+    if (breakPoints[i]==lineNumber) return 1;
+    if (breakPoints[i]==-1) return 0;
+    i++;
   }
   return 0;
 }
@@ -404,40 +406,112 @@ uint32_t getInstructionAtPC(struct Processor *proc){
   return *(uint32_t *)(proc->memory + proc->pc);
 }
 
+void printSegmentationFaultMessage(void) {
+  printf("Executing the current line would cause segmentation fault.\n");
+  printf("Please use the 'list' command to track the line where the error occurred\n");
+}
+
+int checkRtypeInstructionIsValid(uint32_t ins) {
+  uint8_t r1 = getR1(ins);
+  uint8_t r2 = getR2(ins);
+  uint8_t r3 = getR3(ins);
+  if (r1<0 || r2<0 || r3<0 || r1>=NUMBER_OF_REGISTERS || r2>=NUMBER_OF_REGISTERS 
+        || r3>=NUMBER_OF_REGISTERS) {
+    printSegmentationFaultMessage();
+    return 0;
+  }
+  return 1;
+}
+
+int checkBrachInstructionIsValid(uint32_t ins, struct Processor *proc) {
+  uint8_t r1 = getR1(ins);
+  uint8_t r2 = getR2(ins);
+  int16_t iVal = getImmediateValue(ins);
+  uint32_t pc = proc->pc;
+  if (r1<0 || r2<0 || r1>=NUMBER_OF_REGISTERS || r2>=NUMBER_OF_REGISTERS 
+                                || pc+(iVal*4)<0 || pc+(iVal*4)>=MEMORY_SIZE) {
+    printSegmentationFaultMessage();
+    return 0;
+  }
+  return 1;
+}
+
+int checkItypeInstructionIsValid(uint32_t ins) {
+  uint8_t r1 = getR1(ins);
+  uint8_t r2 = getR2(ins);
+  if (r1<0 || r2<0 || r1>=NUMBER_OF_REGISTERS || r2>=NUMBER_OF_REGISTERS) {
+    printSegmentationFaultMessage();
+    return 0;
+  }
+  return 1;
+}
+
+int checkJtypeIsValid(uint32_t ins) {
+  uint32_t add = getAddress(ins);
+  if (add<0 || add>=MEMORY_SIZE) {
+    printSegmentationFaultMessage();
+    return 0;
+  }
+  return 1;
+}
+
+int checkIfLoadAndStoreAreValid(uint32_t ins) {
+  uint8_t r1 = getR1(ins);
+  uint8_t r2 = getR2(ins);
+  int16_t iVal = getImmediateValue(ins);
+  if (r1<0 || r2<0 || r1>=NUMBER_OF_REGISTERS || r2>=NUMBER_OF_REGISTERS 
+                                        || r2+iVal<0 || r2+iVal>=MEMORY_SIZE) {
+    printSegmentationFaultMessage();
+    return 0;
+  }
+  return 1;
+}
+
 int carryOutInstruction(struct Processor *processor) {
   uint32_t instruction = getInstructionAtPC(processor);
   uint8_t opcode = getOpcode(instruction);
+  if (opcode<0 || opcode>NUMBER_OF_INSTRUCTIONS) {
+    printf("The opcode for the current instruction is invalid. This would cause SEGMENTATION FAULT\n");
+    programExitValue =1;
+    return 0;    
+  };
   uint32_t backupPC = processor->pc;
   int32_t temp;
   div_t division;
   switch (opcode)  {
     case HALT : return 0;
-    case ADD  : processor->gpr[getR1(instruction)] = 
+    case ADD  : if (checkRtypeInstructionIsValid(instruction)==0) return 0;
+                processor->gpr[getR1(instruction)] = 
                   getRegisterValue(processor, getR2(instruction)) + 
                   getRegisterValue(processor, getR3(instruction));
                 break;
                 
-    case ADDI : processor->gpr[getR1(instruction)] = 
+    case ADDI : if (checkItypeInstructionIsValid(instruction)==0) return 0;
+                processor->gpr[getR1(instruction)] = 
                   getRegisterValue(processor, getR2(instruction)) + 
                   getImmediateValue(instruction);
                 break;
                
-    case SUB  : processor->gpr[getR1(instruction)] = 
+    case SUB  : if (checkRtypeInstructionIsValid(instruction)==0) return 0;
+                processor->gpr[getR1(instruction)] = 
                   getRegisterValue(processor, getR2(instruction)) - 
                   getRegisterValue(processor, getR3(instruction));
                 break;
                 
-    case SUBI : processor->gpr[getR1(instruction)] = 
+    case SUBI : if (checkItypeInstructionIsValid(instruction)==0) return 0;
+                processor->gpr[getR1(instruction)] = 
                   getRegisterValue(processor, getR2(instruction)) - 
                    getImmediateValue(instruction);
                  break;
                   
-    case MUL  : processor->gpr[getR1(instruction)] = 
+    case MUL  : if (checkRtypeInstructionIsValid(instruction)==0) return 0;
+                processor->gpr[getR1(instruction)] = 
                   getRegisterValue(processor, getR2(instruction)) * 
                   getRegisterValue(processor, getR3(instruction));
                 break;
                   
-    case MULI : processor->gpr[getR1(instruction)] = 
+    case MULI : if (checkItypeInstructionIsValid(instruction)==0) return 0;
+                processor->gpr[getR1(instruction)] = 
                   getRegisterValue(processor, getR2(instruction)) * 
                   getImmediateValue(instruction);
                 break;
@@ -454,97 +528,117 @@ int carryOutInstruction(struct Processor *processor) {
                   getRegisterValue(processor, getR1(instruction)));
                 break;
                 
-    case BEQ  : if (processor->gpr[getR1(instruction)] == 
+    case BEQ  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+                  return 0;
+                if (processor->gpr[getR1(instruction)] == 
                     processor->gpr[getR2(instruction)]) 
                   { processor->pc += getImmediateValue(instruction) * 4;};
                 break;
                   
-      case BNE  : if (processor->gpr[getR1(instruction)] != 
-                      processor->gpr[getR2(instruction)]) 
-                    { processor->pc += getImmediateValue(instruction) * 4;};
-                  break;
+    case BNE  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+                return 0;
+                if (processor->gpr[getR1(instruction)] != 
+                    processor->gpr[getR2(instruction)]) 
+                { processor->pc += getImmediateValue(instruction) * 4;};
+                break;
                   
-      case BLT  : if (processor->gpr[getR1(instruction)] <
-                      processor->gpr[getR2(instruction)])
-                    { processor->pc += getImmediateValue(instruction) * 4;};
-                  break;
+    case BLT  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+                return 0;
+                if (processor->gpr[getR1(instruction)] <
+                   processor->gpr[getR2(instruction)])
+                { processor->pc += getImmediateValue(instruction) * 4;};
+                break;
                   
-      case BGT  : if (processor->gpr[getR1(instruction)] >
-                     processor->gpr[getR2(instruction)]) 
-                   { processor->pc += getImmediateValue(instruction) * 4;};
-                  break;
+    case BGT  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+                return 0;
+                if (processor->gpr[getR1(instruction)] >
+                  processor->gpr[getR2(instruction)]) 
+                { processor->pc += getImmediateValue(instruction) * 4;};
+                break;
                   
-      case BLE  : if (processor->gpr[getR1(instruction)] <= 
-                      processor->gpr[getR2(instruction)]) 
-                  { processor->pc += getImmediateValue(instruction) * 4;};
-                  break;
-                  
-      case BGE  : if (processor->gpr[getR1(instruction)] >= 
-                      processor->gpr[getR2(instruction)]) 
-                    { processor->pc += (getImmediateValue(instruction) * 4);};
-                  break;
-                  
-      case JMP  : processor->pc = getAddress(instruction);
-                  break;
-                  
-      case JR   : processor->pc = getRegisterValue
-                    (processor, getR1(instruction));
-                  break;
-                  
-      case JAL  : processor->gpr[31] = processor->pc + sizeof(uint32_t); 
-                  processor->pc = getAddress(instruction);
-                  break;
-                  
-      case OUT  : printf("%c", (char)getRegisterValue
-                    (processor, getR1(instruction)));
-                  break;
-                  
-      case DIV  : division = div(getRegisterValue(processor,getR2(instruction))
-                              ,getRegisterValue(processor,getR3(instruction)));
-                  processor->gpr[getR1(instruction)] = division.quot;
-      
-      case DIVI : division = div(getRegisterValue(processor,getR2(instruction))
-                              ,getImmediateValue(instruction));
-                  processor->gpr[getR1(instruction)] = division.quot;
-      
-      case MOD  : division = div(getRegisterValue(processor,getR2(instruction))
-                              ,getRegisterValue(processor,getR3(instruction)));
-                  processor->gpr[getR1(instruction)] = division.rem;
-      
-      case MODI : division = div(getRegisterValue(processor,getR2(instruction))
-                              ,getImmediateValue(instruction));
-                  processor->gpr[getR1(instruction)] = division.rem;
-      
-      case FACT : processor->gpr[getR1(instruction)] = 
-                  getRegisterValue(processor, getR2(instruction));
-                  for(int i = 1; i<processor->gpr[getR2(instruction)] ; i++) {
-                    processor->gpr[getR1(instruction)] = 
-                      (getRegisterValue(processor, getR1(instruction)))*
-                      (getRegisterValue(processor, getR2(instruction))-i);};
-                  break;
-      
-      case FACTI: processor->gpr[getR1(instruction)] = 
-                  getImmediateValue(instruction);
-                  for(int i = 1; i<getImmediateValue(instruction) ; i++) {
-                    processor->gpr[getR1(instruction)] = 
-                      (getRegisterValue(processor, getR1(instruction)))*
-                      (getImmediateValue(instruction)-i);};
-                  break;
-      
-      case SWAP : temp = 
-                    getRegisterValue(processor, getR1(instruction));
-                  processor->gpr[getR1(instruction)] = 
-                    getRegisterValue(processor, getR2(instruction));
-                  processor->gpr[getR2(instruction)] = temp;
-                  break;
-                  
-      default   : printf("invalid opcode\n");
-                  break;
+    case BLE  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
                   return 0;
-    }
-    
-    if(processor->pc == backupPC)  processor->pc += sizeof(uint32_t);
-    return 1;
+                if (processor->gpr[getR1(instruction)] <= 
+                   processor->gpr[getR2(instruction)]) 
+                { processor->pc += getImmediateValue(instruction) * 4;};
+                break;
+                  
+    case BGE  : if (checkBrachInstructionIsValid(instruction,processor)==0) 
+                return 0;
+                if (processor->gpr[getR1(instruction)] >= 
+                   processor->gpr[getR2(instruction)]) 
+                { processor->pc += (getImmediateValue(instruction) * 4);};
+                break;
+                  
+    case JMP  : if (checkJtypeIsValid(instruction)==0) return 0;
+                processor->pc = getAddress(instruction);
+                break;
+                  
+    case JR   : if (checkRtypeInstructionIsValid(instruction)==0) return 0;
+                processor->pc = getRegisterValue
+                  (processor, getR1(instruction));
+                break;
+                  
+    case JAL  : if (checkJtypeIsValid(instruction)==0) return 0;
+                processor->gpr[31] = processor->pc + sizeof(uint32_t); 
+                processor->pc = getAddress(instruction);
+                break;
+                  
+    case OUT  : if (checkRtypeInstructionIsValid(instruction)==0) return 0;
+                printf("%c", (char)getRegisterValue
+                  (processor, getR1(instruction)));
+                break;
+                  
+    case DIV  : if (checkRtypeInstructionIsValid(instruction)==0) return 0;
+                division = div(getRegisterValue(processor,getR2(instruction))
+                            ,getRegisterValue(processor,getR3(instruction)));
+                processor->gpr[getR1(instruction)] = division.quot;
+     
+    case DIVI : if (checkItypeInstructionIsValid(instruction)==0) return 0;
+                division = div(getRegisterValue(processor,getR2(instruction))
+                            ,getImmediateValue(instruction));
+                processor->gpr[getR1(instruction)] = division.quot;
+      
+    case MOD  : if (checkRtypeInstructionIsValid(instruction)==0) return 0;
+                division = div(getRegisterValue(processor,getR2(instruction))
+                            ,getRegisterValue(processor,getR3(instruction)));
+                processor->gpr[getR1(instruction)] = division.rem;
+      
+    case MODI : if (checkItypeInstructionIsValid(instruction)==0) return 0;
+                division = div(getRegisterValue(processor,getR2(instruction))
+                            ,getImmediateValue(instruction));
+                processor->gpr[getR1(instruction)] = division.rem;
+      
+    case FACT : if (checkRtypeInstructionIsValid(instruction)==0) return 0;
+                processor->gpr[getR1(instruction)] = 
+                getRegisterValue(processor, getR2(instruction));
+                for(int i = 1; i<processor->gpr[getR2(instruction)] ; i++) {
+                  processor->gpr[getR1(instruction)] = 
+                    (getRegisterValue(processor, getR1(instruction)))*
+                    (getRegisterValue(processor, getR2(instruction))-i);
+                }
+                break;
+      
+    case FACTI: if (checkItypeInstructionIsValid(instruction)==0) return 0;
+                processor->gpr[getR1(instruction)] = 
+                getImmediateValue(instruction);
+                for(int i = 1; i<getImmediateValue(instruction) ; i++) {
+                  processor->gpr[getR1(instruction)] = 
+                    (getRegisterValue(processor, getR1(instruction)))*
+                    (getImmediateValue(instruction)-i);
+                }
+                break;
+      
+    case SWAP : if (checkRtypeInstructionIsValid(instruction)==0) return 0;
+                temp = 
+                  getRegisterValue(processor, getR1(instruction));
+                processor->gpr[getR1(instruction)] = 
+                  getRegisterValue(processor, getR2(instruction));
+                processor->gpr[getR2(instruction)] = temp;
+                break;
+  }
+  if(processor->pc == backupPC)  processor->pc += sizeof(uint32_t);
+  return 1;
 }
 
 void step(struct Processor *proc) {
@@ -691,24 +785,41 @@ int confirmToQuit() {
 }
  
  
-void run(struct Processor *proc) {
+void run(struct Processor *proc,int *breakPoints) {
   if (programExitValue==1) {
       printf("No programs running currently. The previous program has exited already so step cannot be executed\n");
       return;
   }
   int retVal = 1;
-  while (retVal) {
+  
+  do {
     retVal = carryOutInstruction(proc);  
+  } while (retVal && !checkIfBreakPoint(breakPoints,(proc->pc/4)+1));
+  if (programExitValue==1) return;
+  if (checkIfBreakPoint(breakPoints,((int) proc->pc/4)+1)==1) {
+    printf("Breakpoint reached.\n");
+    return;
   }
   fflush(stdout);
   dumpProcessor(proc);
   programExitValue = 1;
-  printf("Program exited normally.\n");
+  printf("\nProgram exited normally.\n");
 }
 
 void setBreakPoints(int *breakPoints,char **tokens) {
-  checkAllNumbersValid
-  
+  int *temp = malloc(sizeof(int) * BREAKPOINTS_ARRAY_SIZE);
+  int i=0;
+  while(*tokens) {
+    if (checkIfNumber(*tokens)==0) {
+      printInvalidCommandMessage();
+      return;
+    }
+    temp[i] = atoi(*tokens);
+    i++;
+    tokens++;
+  }
+  memcpy(breakPoints,temp,sizeof(int) * i);
+  free(temp);
 }
 
 int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char **tokens, int *breakPoints) {
@@ -737,12 +848,13 @@ int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char *
     system("cat help.txt | less");
     return 0;
   } else if (strcmp(tokens[0], "run")==0) {
-    run(proc);
+    run(proc,breakPoints);
     return 0;
   } else if (strcmp(tokens[0],"q")==0) {
     return confirmToQuit();
   } else if (strcmp(tokens[0],"break")==0) {
-    setBreakPoints(breakPoints,tokens);
+    setBreakPoints(breakPoints,tokens+1);
+    return 0;
   }
   return 0;
 }
@@ -755,13 +867,18 @@ int main(int argc, char **argv) {
   memset(proc,0,sizeof(struct Processor));
   binaryFileLoader(fBin,proc);
   system("clear");
+  int *breakPoints = malloc(sizeof(int) *BREAKPOINTS_ARRAY_SIZE);
+  memset(breakPoints,-1,sizeof(int) *BREAKPOINTS_ARRAY_SIZE);
   printWelcomeMessage();
   char **tokens = malloc(sizeof(char) *BUFFER_SIZE);
   int returnVal = 0; 
   do {
     tokens = getUserCommand();
-    returnVal = executeUserCommand(fAssembly,fBin,proc,tokens);
+    returnVal = executeUserCommand(fAssembly,fBin,proc,tokens,breakPoints);
   } while (!returnVal);
-  printf("Thanks for using JVG debugger\n");  
+  printf("Thanks for using JVG debugger\n");
+  system("clear");
+  free(proc);
+  free(breakPoints);
   return EXIT_SUCCESS;
 }
