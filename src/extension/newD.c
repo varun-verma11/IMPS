@@ -12,6 +12,7 @@
 #define NUMBER_OF_COMMANDS 10
 #define NUMBER_OF_INSTRUCTIONS 26
 #define BUFFER_SIZE 300      
+#define BREAKPOINTS_ARRAY_SIZE 100
                 
 char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help","break"};
 
@@ -121,15 +122,14 @@ void printReg(struct Processor *proc , char **tokens) {
     printInvalidCommandMessage();
     return;
   } 
-  int x=start;
-  for (int i=0; i<end%8 ; i++) {    
-    for (int j=0;j<8 ; j++) {
-      if(x>end) break;
-      printf("$%i = %i,\t",x,getRegisterValue(proc,x));
-      x++;
+
+  for(int i = 0; i <=end/8; i++) {
+    for(int j = 0; j < 8; j++) {
+       int reg = i * 8 + j;
+       fprintf(stderr, "R%d=%d\t", reg, getRegisterValue(proc, reg));
     }
-    printf("\n");
-  }
+      fprintf(stderr, "\n");
+   }
   printf("\n");
 }
 
@@ -298,10 +298,10 @@ void search(struct Processor *proc,char **tokens) {
 }
 
 int checkIfBreakPoint(int *breakPoints, int lineNumber) {
-  while(*breakPoints) {
-    printf("array --> %i, line--> %i\n",*breakPoints,lineNumber);
-    if (*breakPoints==lineNumber) return 1;
-    breakPoints++;
+  for (int i=0; i<BREAKPOINTS_ARRAY_SIZE ;i++) {
+    if (breakPoints[i]==lineNumber) return 1;
+    if (breakPoints[i]==-1) return 0;
+    i++;
   }
   return 0;
 }
@@ -791,12 +791,12 @@ void run(struct Processor *proc,int *breakPoints) {
       return;
   }
   int retVal = 1;
+  
   do {
     retVal = carryOutInstruction(proc);  
-    printf("line number --> %i\n",((int) proc->pc/4)+1);
   } while (retVal && !checkIfBreakPoint(breakPoints,(proc->pc/4)+1));
   if (programExitValue==1) return;
-  if (checkIfBreakPoint(breakPoints,((int) proc->pc/4)+1)==0) {
+  if (checkIfBreakPoint(breakPoints,((int) proc->pc/4)+1)==1) {
     printf("Breakpoint reached.\n");
     return;
   }
@@ -807,7 +807,7 @@ void run(struct Processor *proc,int *breakPoints) {
 }
 
 void setBreakPoints(int *breakPoints,char **tokens) {
-  int *temp = malloc(sizeof(int) * 100);
+  int *temp = malloc(sizeof(int) * BREAKPOINTS_ARRAY_SIZE);
   int i=0;
   while(*tokens) {
     if (checkIfNumber(*tokens)==0) {
@@ -818,7 +818,7 @@ void setBreakPoints(int *breakPoints,char **tokens) {
     i++;
     tokens++;
   }
-  memcpy(breakPoints,temp,sizeof(int) * (i-1));
+  memcpy(breakPoints,temp,sizeof(int) * i);
   free(temp);
 }
 
@@ -867,7 +867,8 @@ int main(int argc, char **argv) {
   memset(proc,0,sizeof(struct Processor));
   binaryFileLoader(fBin,proc);
   system("clear");
-  int *breakPoints = malloc(sizeof(int) *100);
+  int *breakPoints = malloc(sizeof(int) *BREAKPOINTS_ARRAY_SIZE);
+  memset(breakPoints,-1,sizeof(int) *BREAKPOINTS_ARRAY_SIZE);
   printWelcomeMessage();
   char **tokens = malloc(sizeof(char) *BUFFER_SIZE);
   int returnVal = 0; 
