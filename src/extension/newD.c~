@@ -14,7 +14,7 @@
 #define BUFFER_SIZE 300      
 #define BREAKPOINTS_ARRAY_SIZE 100
                 
-char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help","break","back"};
+char debugInstructions[][NUMBER_OF_COMMANDS] = {"list","stp","reg","mem","search","pc", "run", "q","--help","break","back","rerun"};
 
 enum opCodes {HALT, ADD, ADDI, SUB,SUBI,MUL,MULI,LW,SW,BEQ, BNE, BLT, BGT, BLE, 
                 BGE, JMP, JR, JAL, OUT, DIV, DIVI, MOD, MODI, FACT, FACTI,SWAP};
@@ -807,6 +807,28 @@ void run(struct Processor *proc,int *breakPoints) {
 }
 
 void setBreakPoints(int *breakPoints,char **tokens) {
+
+  if (strcmp(tokens[0],"-r")==0) {
+    tokens++;
+    while(*tokens) {
+      if (checkIfNumber(*tokens)==0) {
+        printInvalidCommandMessage();
+        return;
+      }
+      if (breakPoints[i]==atoi(*tokens)) {
+        breakPoints[i] = -1;
+      };
+      if (breakPoints[i] ==-1) {
+        printInvalidCommandMessage();
+        prtinf("breakpoint does not exists");
+        return;
+      }
+      i++;
+      tokens++;
+    }
+  } else if (strcmp(tokens[
+  
+  tokens++;
   int *temp = malloc(sizeof(int) * BREAKPOINTS_ARRAY_SIZE);
   int i=0;
   while(*tokens) {

@@ -807,19 +807,41 @@ void run(struct Processor *proc,int *breakPoints) {
 }
 
 void setBreakPoints(int *breakPoints,char **tokens) {
-  int *temp = malloc(sizeof(int) * BREAKPOINTS_ARRAY_SIZE);
-  int i=0;
-  while(*tokens) {
-    if (checkIfNumber(*tokens)==0) {
-      printInvalidCommandMessage();
-      return;
-    }
-    temp[i] = atoi(*tokens);
-    i++;
+
+  if (strcmp(tokens[0],"-r")==0) {
     tokens++;
+    while(*tokens) {
+      if (checkIfNumber(*tokens)==0) {
+        printInvalidCommandMessage();
+        return;
+      }
+      if (breakPoints[i]==atoi(*tokens)) {
+        breakPoints[i] = -1;
+      };
+      if (breakPoints[i] ==-1) {
+        printInvalidCommandMessage();
+        prtinf("breakpoint does not exists");
+        return;
+      }
+      i++;
+      tokens++;
+    }
+  } else if (strcmp(tokens[0],"-a")==0) {
+    tokens++;
+    int *temp = malloc(sizeof(int) * BREAKPOINTS_ARRAY_SIZE);
+    int i=0;
+    while(*tokens) {
+      if (checkIfNumber(*tokens)==0) {
+        printInvalidCommandMessage();
+        return;
+      }
+      temp[i] = atoi(*tokens);
+      i++;
+      tokens++;
+    }
+    memcpy(breakPoints,temp,sizeof(int) * i);
+    free(temp);
   }
-  memcpy(breakPoints,temp,sizeof(int) * i);
-  free(temp);
 }
 
 int executeUserCommand(char *assembly, char *bin, struct Processor *proc, char **tokens, int *breakPoints) {
@@ -875,6 +897,7 @@ int main(int argc, char **argv) {
   do {
     tokens = getUserCommand();
     returnVal = executeUserCommand(fAssembly,fBin,proc,tokens,breakPoints);
+    free(tokens);
   } while (!returnVal);
   printf("Thanks for using JVG debugger\n");
   system("clear");
